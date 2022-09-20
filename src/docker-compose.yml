@@ -1,0 +1,20 @@
+version: "3"
+services:
+  mysql:
+    container_name: mysql8.0.28-est
+    image: mysql:8.0.28
+    platform: linux/amd64
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_USER=est
+      - MYSQL_PASSWORD=est
+      - MYSQL_DATABASE=est
+      - TZ=Asia/Seoul
+    command: [ '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci' ]
+    ports:
+      - "3307:3306"
+    restart: unless-stopped
+    volumes:
+      - ./docker/initdb.d:/docker-entrypoint-initdb.d
+      - ./docker/mysql:/var/lib/mysql

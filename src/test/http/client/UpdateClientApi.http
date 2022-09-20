@@ -1,0 +1,4 @@
+PUT http://localhost:8080/api/v1/clients/e1620936-5926-4cb0-b257-425df37ada20
+Content-Type: application/json
+
+< json/UpdateValidClient.json

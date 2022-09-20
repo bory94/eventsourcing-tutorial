@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    hikari:
+      jdbc-url: "jdbc:mysql://localhost:3307/est?characterEncoding=UTF-8&useTimezone=true&serverTimezone=Asia/Seoul"
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      username: est
+      password: est
+      maximum-pool-size: 40
+      minimum-idle: 20
+      pool-name: hikari-pool
+      connection-timeout: 30000
+      idle-timeout: 20000
+      max-lifetime: 28000
+
+  sleuth:
+    trace-id128: true
+    sampler:
+      probability: 1.0
+    baggage:
+      remote-fields: request_id
+
+  application:
+    name: eventsourcing-tutorial
+
+log4jdbc:
+  dump:
+    sql:
+      addsemicolon: true
+      maxlinelength: 0
+  trim.sql.extrablanklines: false
+
+
+logging:
+  level:
+    com.bory.dddtutorial: DEBUG
+    org.springframework:
+      transaction.support.TransactionSynchronizationUtils: DEBUG
+      web.servlet.DispatcherServlet: DEBUG
+    jdbc:
+      resultsettable: info
+      sqltiming: info
+      sqlonly: fatal
+      audit: fatal
+      resultset: fatal
+      connection: fatal
