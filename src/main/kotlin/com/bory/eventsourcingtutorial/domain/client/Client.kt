@@ -66,8 +66,31 @@ class Client(
         address = command.client.address
     )
 
+    fun updateClient(updatingClient: Client) {
+        name = updatingClient.name
+        address = updatingClient.address
+        phoneNumber = updatingClient.phoneNumber
+    }
+
+    fun deleteClient() {
+        this.deleted = true
+    }
+
     fun addProject(projects: List<Project>) {
         this.projects += projects
+    }
+
+    fun updateProject(updatingProject: Project) {
+        val project = projects.firstOrNull { it.uuid == updatingProject.uuid }
+            ?: throw NoSuchProjectException("No Such Project[${updatingProject.uuid}] found")
+        project.name = updatingProject.name
+        project.description = updatingProject.description
+        project.updatedAt = Instant.now()
+    }
+
+    fun removeProject(projectUuid: String) {
+        projects -= projects.find { it.uuid == projectUuid }
+            ?: throw NoSuchProjectException("No Such Project[$projectUuid] found")
     }
 
     override fun toString(): String {

@@ -12,4 +12,3 @@ fun String.toCamelCase(): String {
     }
     return str
 }
-

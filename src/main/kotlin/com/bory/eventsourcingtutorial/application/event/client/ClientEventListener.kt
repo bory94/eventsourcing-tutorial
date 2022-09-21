@@ -27,9 +27,7 @@ class ClientEventListener(
             val loadedClient = clientRepository.findByUuidAndDeletedIsFalse(event.client.uuid)
                 ?: throw NoSuchClientException("No Such Client[${event.client.uuid}] found, or else deleted uuid inserted")
 
-            loadedClient.name = event.client.name
-            loadedClient.address = event.client.address
-            loadedClient.phoneNumber = event.client.phoneNumber
+            loadedClient.updateClient(event.client)
 
             clientRepository.save(loadedClient)
         }
@@ -43,7 +41,7 @@ class ClientEventListener(
             val loadedClient = clientRepository.findById(event.clientUuid)
                 .orElseThrow { throw NoSuchClientException("No Such Client[${event.clientUuid}] found") }
 
-            loadedClient.deleted = true
+            loadedClient.deleteClient()
 
             clientRepository.save(loadedClient)
         }

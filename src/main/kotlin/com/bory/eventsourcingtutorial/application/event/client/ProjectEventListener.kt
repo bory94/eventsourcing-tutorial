@@ -8,7 +8,6 @@ import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
 
 @Component
 class ProjectEventListener(
@@ -42,13 +41,29 @@ class ProjectEventListener(
             val client = clientRepository.findByUuidAndDeletedIsFalse(event.clientUuid)
                 ?: throw NoSuchClientException("No Such Client[${event.clientUuid}] found, or else deleted uuid inserted")
 
-            val project = client.projects.firstOrNull { it.uuid == event.project.uuid }
-                ?: throw NoSuchClientException("No Such Project[${event.project.uuid}] found, or else deleted uuid inserted")
-            project.name = event.project.name
-            project.description = event.project.description
-            project.updatedAt = Instant.now()
+            client.updateProject(event.project)
 
             clientRepository.save(client)
+        }
+    }
+
+    @Async
+    @Transactional
+    @EventListener(classes = [ProjectDeletedEvent::class])
+    fun on(event: ProjectDeletedEvent) {
+        retry(
+            times = 3,
+            skipRetryExceptions = arrayOf(
+                NoSuchClientException::class.java,
+                NoSuchProjectException::class.java
+            )
+        ) {
+            val loadedClient = clientRepository.findByUuidAndDeletedIsFalse(event.clientUuid)
+                ?: throw NoSuchClientException("No Such Client[${event.clientUuid}] found")
+
+            loadedClient.removeProject(event.projectUuid)
+
+            clientRepository.save(loadedClient)
         }
     }
 }

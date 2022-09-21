@@ -1,5 +1,6 @@
 package com.bory.eventsourcingtutorial.domain.client
 
+import com.bory.eventsourcingtutorial.application.event.client.*
 import com.bory.eventsourcingtutorial.domain.core.EventSource
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -14,23 +15,19 @@ class ClientProjector(
         initial.createdAt = eventSources[0].createdAt
         initial.updatedAt = eventSources[0].createdAt
 
-        return eventSources.subList(1, eventSources.size)
-            .fold(initial) { client, eventSource ->
-                when (eventSource.type) {
-                    "com.bory.eventsourcingtutorial.application.event.client.ClientUpdatedEvent"
-                    -> updateClient(client, eventSource)
-                    "com.bory.eventsourcingtutorial.application.event.client.ClientDeletedEvent"
-                    -> deleteClient(client, eventSource)
-                    "com.bory.eventsourcingtutorial.application.event.client.ProjectsAddedEvent"
-                    -> addProjects(client, eventSource)
-                    "com.bory.eventsourcingtutorial.application.event.client.ProjectUpdatedEvent"
-                    -> updateProject(client, eventSource)
-                    else -> throw java.lang.IllegalArgumentException("Event Type[${eventSource.type}] Not supported")
-                }.apply {
-                    version += 1
-                    updatedAt = eventSource.createdAt
-                }
+        return eventSources.subList(1, eventSources.size).fold(initial) { client, eventSource ->
+            when (eventSource.type) {
+                ClientUpdatedEvent::class.java.canonicalName -> updateClient(client, eventSource)
+                ClientDeletedEvent::class.java.canonicalName -> deleteClient(client, eventSource)
+                ProjectsAddedEvent::class.java.canonicalName -> addProjects(client, eventSource)
+                ProjectUpdatedEvent::class.java.canonicalName -> updateProject(client, eventSource)
+                ProjectDeletedEvent::class.java.canonicalName -> deleteProject(client, eventSource)
+                else -> throw java.lang.IllegalArgumentException("Event Type[${eventSource.type}] Not supported")
+            }.apply {
+                version += 1
+                updatedAt = eventSource.createdAt
             }
+        }
     }
 
     fun updateClient(client: Client, eventSource: EventSource) = client.apply {
@@ -45,11 +42,11 @@ class ClientProjector(
     }
 
     fun addProjects(client: Client, eventSource: EventSource): Client = client.apply {
-        val newProjects =
-            objectMapper.readValue(
-                eventSource.payload!!, object : TypeReference<List<Project>>() {}
-            )
-        projects += newProjects
+        val newProjects = objectMapper.readValue(
+            eventSource.payload!!, object : TypeReference<List<Project>>() {}
+        )
+
+        this.addProject(newProjects)
     }
 
     fun updateProject(client: Client, eventSource: EventSource): Client = client.apply {
@@ -60,5 +57,11 @@ class ClientProjector(
             project.name = updatingProject.name
             project.description = updatingProject.description
         }
+    }
+
+    fun deleteProject(client: Client, eventSource: EventSource): Client = client.apply {
+        val deletingProjectUuid = eventSource.payload!!
+
+        this.removeProject(deletingProjectUuid)
     }
 }

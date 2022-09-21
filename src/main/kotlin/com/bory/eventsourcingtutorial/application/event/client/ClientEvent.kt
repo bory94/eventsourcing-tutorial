@@ -25,3 +25,8 @@ data class ProjectUpdatedEvent(
     val clientUuid: String,
     val project: Project
 ) : AbstractCustomEvent()
+
+data class ProjectDeletedEvent(
+    val clientUuid: String,
+    val projectUuid: String
+) : AbstractCustomEvent()
