@@ -1,6 +1,7 @@
 package com.bory.eventsourcingtutorial.infrastructure.repository.core
 
-import com.bory.eventsourcingtutorial.domain.core.EventSource
+import com.bory.eventsourcingtutorial.core.domain.EventSource
+import com.bory.eventsourcingtutorial.core.infrastructure.persistence.EventSourceRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

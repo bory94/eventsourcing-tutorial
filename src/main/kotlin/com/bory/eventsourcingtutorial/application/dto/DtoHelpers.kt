@@ -1,3 +1,0 @@
-package com.bory.eventsourcingtutorial.application.dto
-
-interface NotInCreatingContext
