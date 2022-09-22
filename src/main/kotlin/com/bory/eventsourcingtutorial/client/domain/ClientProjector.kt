@@ -18,7 +18,7 @@ class ClientProjector(
         return eventSources.subList(1, eventSources.size).fold(initial) { client, eventSource ->
             when (eventSource.type) {
                 ClientUpdatedEvent::class.java.canonicalName -> updateClient(client, eventSource)
-                ClientDeletedEvent::class.java.canonicalName -> deleteClient(client, eventSource)
+                ClientDeletedEvent::class.java.canonicalName -> deleteClient(client)
                 ProjectsAddedEvent::class.java.canonicalName -> addProjects(client, eventSource)
                 ProjectUpdatedEvent::class.java.canonicalName -> updateProject(client, eventSource)
                 ProjectDeletedEvent::class.java.canonicalName -> deleteProject(client, eventSource)
@@ -30,18 +30,18 @@ class ClientProjector(
         }
     }
 
-    fun updateClient(client: Client, eventSource: EventSource) = client.apply {
+    private fun updateClient(client: Client, eventSource: EventSource) = client.apply {
         val dataClient = objectMapper.readValue(eventSource.payload!!, Client::class.java)
         name = dataClient.name
         address = dataClient.address
         phoneNumber = dataClient.phoneNumber
     }
 
-    fun deleteClient(client: Client, eventSource: EventSource): Client = client.apply {
+    private fun deleteClient(client: Client): Client = client.apply {
         deleted = true
     }
 
-    fun addProjects(client: Client, eventSource: EventSource): Client = client.apply {
+    private fun addProjects(client: Client, eventSource: EventSource): Client = client.apply {
         val newProjects = objectMapper.readValue(
             eventSource.payload!!, object : TypeReference<List<Project>>() {}
         )
@@ -49,7 +49,7 @@ class ClientProjector(
         this.addProject(newProjects)
     }
 
-    fun updateProject(client: Client, eventSource: EventSource): Client = client.apply {
+    private fun updateProject(client: Client, eventSource: EventSource): Client = client.apply {
         val updatingProject = objectMapper.readValue(eventSource.payload!!, Project::class.java)
 
         val project = projects.firstOrNull { it.uuid == updatingProject.uuid }
@@ -59,7 +59,7 @@ class ClientProjector(
         }
     }
 
-    fun deleteProject(client: Client, eventSource: EventSource): Client = client.apply {
+    private fun deleteProject(client: Client, eventSource: EventSource): Client = client.apply {
         val deletingProjectUuid = eventSource.payload!!
 
         this.removeProject(deletingProjectUuid)
