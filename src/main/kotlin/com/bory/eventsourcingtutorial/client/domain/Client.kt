@@ -83,9 +83,7 @@ class Client(
     fun updateProject(updatingProject: Project) {
         val project = projects.firstOrNull { it.uuid == updatingProject.uuid }
             ?: throw NoSuchProjectException("No Such Project[${updatingProject.uuid}] found")
-        project.name = updatingProject.name
-        project.description = updatingProject.description
-        project.updatedAt = Instant.now()
+        project.updateWith(updatingProject)
     }
 
     fun removeProject(projectUuid: String) {
@@ -117,4 +115,10 @@ data class Project(
         description = projectDto.description,
         clientUuid = clientUuid
     )
+
+    fun updateWith(newProject: Project) {
+        name = newProject.name
+        description = newProject.description
+        updatedAt = Instant.now()
+    }
 }
