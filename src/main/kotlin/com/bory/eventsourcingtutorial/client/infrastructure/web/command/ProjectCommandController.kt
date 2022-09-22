@@ -1,25 +1,28 @@
 package com.bory.eventsourcingtutorial.client.infrastructure.web.command
 
 import com.bory.eventsourcingtutorial.client.application.command.AddProjectsCommand
+import com.bory.eventsourcingtutorial.client.application.command.DeleteProjectCommand
 import com.bory.eventsourcingtutorial.client.application.command.UpdateProjectCommand
-import com.bory.eventsourcingtutorial.core.application.dto.EventSourceResponse
 import com.bory.eventsourcingtutorial.client.application.event.ProjectDeletedEvent
 import com.bory.eventsourcingtutorial.client.application.event.ProjectUpdatedEvent
 import com.bory.eventsourcingtutorial.client.application.event.ProjectsAddedEvent
 import com.bory.eventsourcingtutorial.client.domain.Project
+import com.bory.eventsourcingtutorial.core.application.dto.EventSourceResponse
 import com.bory.eventsourcingtutorial.core.domain.EventSource
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
+import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
-import javax.validation.ValidationException
+import javax.validation.Validator
 
 @RestController
 @RequestMapping("/api/v1/clients/{uuid}/projects")
 class ProjectCommandController(
     private val objectMapper: ObjectMapper,
-    private val eventSourceService: EventSourceService
+    private val eventSourceService: EventSourceService,
+    private val customValidator: Validator
 ) {
     @PostMapping
     fun addProjects(
@@ -59,8 +62,7 @@ class ProjectCommandController(
         @PathVariable("uuid") clientUuid: String,
         @PathVariable("projectUuid") projectUuid: String
     ) {
-        if (clientUuid.length != 36) throw ValidationException("Invalid Client UUID: $clientUuid")
-        if (projectUuid.length != 36) throw ValidationException("Invalid Project UUID: $projectUuid")
+        customValidator.validateAndThrow(DeleteProjectCommand(clientUuid, projectUuid))
 
         return EventSource(
             aggregateId = clientUuid,

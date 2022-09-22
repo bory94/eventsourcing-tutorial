@@ -1,1 +1,5 @@
 DELETE http://localhost:8080/api/v1/clients/3db0327a-e9af-4421-9339-d92193695933/projects/30c59c82-da8e-4e7a-b4ad-a5cc86b8e83c
+
+###
+
+DELETE http://localhost:8080/api/v1/clients/3db0327a-e9a9339-d92193695933/projects/30c59c82-da8e-4e7a-b4ad-a5cc

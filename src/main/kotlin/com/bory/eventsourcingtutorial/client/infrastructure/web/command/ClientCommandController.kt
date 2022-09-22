@@ -1,6 +1,7 @@
 package com.bory.eventsourcingtutorial.client.infrastructure.web.command
 
 import com.bory.eventsourcingtutorial.client.application.command.CreateClientCommand
+import com.bory.eventsourcingtutorial.client.application.command.DeleteClientCommand
 import com.bory.eventsourcingtutorial.client.application.command.UpdateClientCommand
 import com.bory.eventsourcingtutorial.client.application.event.ClientCreatedEvent
 import com.bory.eventsourcingtutorial.client.application.event.ClientDeletedEvent
@@ -9,18 +10,20 @@ import com.bory.eventsourcingtutorial.client.domain.Client
 import com.bory.eventsourcingtutorial.core.application.dto.EventSourceResponse
 import com.bory.eventsourcingtutorial.core.domain.EventSource
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
+import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
 import javax.validation.Valid
-import javax.validation.ValidationException
+import javax.validation.Validator
 
 @RestController
 @RequestMapping("/api/v1/clients")
 class ClientCommandController(
     private val objectMapper: ObjectMapper,
-    private val eventSourceService: EventSourceService
+    private val eventSourceService: EventSourceService,
+    private val customValidator: Validator
 ) {
     @PostMapping
     fun create(@RequestBody @Valid command: CreateClientCommand): ResponseEntity<EventSourceResponse> {
@@ -53,9 +56,7 @@ class ClientCommandController(
 
     @DeleteMapping("/{uuid}")
     fun delete(@PathVariable("uuid") uuid: String): ResponseEntity<EventSourceResponse> {
-        if (uuid.length != 36) {
-            throw ValidationException("Invalid Client UUID: $uuid")
-        }
+        customValidator.validateAndThrow(DeleteClientCommand(uuid))
 
         return EventSource(
             aggregateId = uuid,
