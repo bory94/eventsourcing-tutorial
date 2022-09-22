@@ -11,18 +11,3 @@ data class CreateClientCommand(
     @field:Valid
     val projects: List<ProjectDto> = listOf()
 )
-
-data class UpdateClientCommand(
-    @field:Valid
-    val client: ClientDto
-)
-
-data class AddProjectsCommand(
-    @field:Valid
-    val projects: List<ProjectDto> = listOf()
-)
-
-data class UpdateProjectCommand(
-    @field:Valid
-    val project: ProjectDto
-)

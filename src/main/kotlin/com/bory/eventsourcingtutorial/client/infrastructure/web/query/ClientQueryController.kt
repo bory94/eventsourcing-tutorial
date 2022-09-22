@@ -2,7 +2,7 @@ package com.bory.eventsourcingtutorial.client.infrastructure.web.query
 
 import com.bory.eventsourcingtutorial.client.domain.Client
 import com.bory.eventsourcingtutorial.client.domain.ClientProjector
-import com.bory.eventsourcingtutorial.client.domain.NoSuchClientException
+import com.bory.eventsourcingtutorial.client.domain.exception.NoSuchClientException
 import com.bory.eventsourcingtutorial.client.infrastructure.persistence.ClientRepository
 import com.bory.eventsourcingtutorial.core.infrastructure.persistence.EventSourceRepository
 import org.springframework.transaction.annotation.Transactional

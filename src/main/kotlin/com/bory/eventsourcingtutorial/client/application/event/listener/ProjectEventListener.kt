@@ -1,7 +1,10 @@
-package com.bory.eventsourcingtutorial.client.application.event
+package com.bory.eventsourcingtutorial.client.application.event.listener
 
-import com.bory.eventsourcingtutorial.client.domain.NoSuchClientException
-import com.bory.eventsourcingtutorial.client.domain.NoSuchProjectException
+import com.bory.eventsourcingtutorial.client.application.event.ProjectDeletedEvent
+import com.bory.eventsourcingtutorial.client.application.event.ProjectUpdatedEvent
+import com.bory.eventsourcingtutorial.client.application.event.ProjectsAddedEvent
+import com.bory.eventsourcingtutorial.client.domain.exception.NoSuchClientException
+import com.bory.eventsourcingtutorial.client.domain.exception.NoSuchProjectException
 import com.bory.eventsourcingtutorial.client.infrastructure.persistence.ClientRepository
 import com.bory.eventsourcingtutorial.core.infrastructure.extensions.retry
 import org.springframework.context.event.EventListener

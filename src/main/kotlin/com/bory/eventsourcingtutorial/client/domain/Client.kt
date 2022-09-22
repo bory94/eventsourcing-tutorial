@@ -2,9 +2,8 @@ package com.bory.eventsourcingtutorial.client.domain
 
 import com.bory.eventsourcingtutorial.client.application.command.CreateClientCommand
 import com.bory.eventsourcingtutorial.client.application.command.UpdateClientCommand
-import com.bory.eventsourcingtutorial.client.application.dto.ProjectDto
+import com.bory.eventsourcingtutorial.client.domain.exception.NoSuchProjectException
 import com.bory.eventsourcingtutorial.core.domain.AbstractPersistableAggregateRoot
-import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.annotation.PersistenceCreator
 import org.springframework.data.relational.core.mapping.MappedCollection
@@ -96,29 +95,5 @@ class Client(
             ${super.toString()}
             Client(name='$name', phoneNumber='$phoneNumber', address='$address', updatedAt=$updatedAt, projects=$projects)
             """
-    }
-}
-
-@Table("project")
-data class Project(
-    @Id
-    var uuid: String = UUID.randomUUID().toString(),
-    var name: String,
-    var description: String,
-    var createdAt: Instant = Instant.now(),
-    var updatedAt: Instant = Instant.now(),
-    val clientUuid: String
-) {
-    constructor(clientUuid: String, projectDto: ProjectDto) : this(
-        uuid = projectDto.uuid ?: UUID.randomUUID().toString(),
-        name = projectDto.name,
-        description = projectDto.description,
-        clientUuid = clientUuid
-    )
-
-    fun updateWith(newProject: Project) {
-        name = newProject.name
-        description = newProject.description
-        updatedAt = Instant.now()
     }
 }
