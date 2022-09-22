@@ -31,15 +31,11 @@ class ClientProjector(
     }
 
     private fun updateClient(client: Client, eventSource: EventSource) = client.apply {
-        val dataClient = objectMapper.readValue(eventSource.payload!!, Client::class.java)
-        name = dataClient.name
-        address = dataClient.address
-        phoneNumber = dataClient.phoneNumber
+        val payloadClient = objectMapper.readValue(eventSource.payload!!, Client::class.java)
+        this.updateWith(payloadClient)
     }
 
-    private fun deleteClient(client: Client): Client = client.apply {
-        deleted = true
-    }
+    private fun deleteClient(client: Client) = client.deleteClient()
 
     private fun addProjects(client: Client, eventSource: EventSource): Client = client.apply {
         val newProjects = objectMapper.readValue(
@@ -53,15 +49,11 @@ class ClientProjector(
         val updatingProject = objectMapper.readValue(eventSource.payload!!, Project::class.java)
 
         val project = projects.firstOrNull { it.uuid == updatingProject.uuid }
-        if (project != null) {
-            project.name = updatingProject.name
-            project.description = updatingProject.description
-        }
+        project?.updateWith(updatingProject)
     }
 
     private fun deleteProject(client: Client, eventSource: EventSource): Client = client.apply {
         val deletingProjectUuid = eventSource.payload!!
-
         this.removeProject(deletingProjectUuid)
     }
 }
