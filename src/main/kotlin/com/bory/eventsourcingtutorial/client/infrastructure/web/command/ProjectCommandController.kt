@@ -12,7 +12,6 @@ import com.bory.eventsourcingtutorial.core.domain.EventSource
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 import javax.validation.Validator
@@ -28,48 +27,50 @@ class ProjectCommandController(
     fun addProjects(
         @PathVariable("uuid") uuid: String,
         @Valid @RequestBody addProjectsCommand: AddProjectsCommand
-    ): ResponseEntity<EventSourceResponse> {
-        val projects = addProjectsCommand.projects.map { Project(uuid, it) }
-
-        return EventSource(
-            aggregateId = uuid,
-            payload = objectMapper.writeValueAsString(projects),
-            event = ProjectsAddedEvent(uuid, projects)
-        )
+    ) =
+        addProjectsCommand.projects.map { Project(uuid, it) }
+            .let { projects ->
+                EventSource(
+                    aggregateId = uuid,
+                    payload = objectMapper.writeValueAsString(projects),
+                    event = ProjectsAddedEvent(uuid, projects)
+                )
+            }
             .let(eventSourceService::create)
             .let { EventSourceResponse(it).acceptedResponse() }
 
-    }
 
     @PutMapping
     fun updateProject(
         @PathVariable("uuid") uuid: String,
         @Valid @RequestBody updateProjectCommand: UpdateProjectCommand
-    ): ResponseEntity<EventSourceResponse> {
-        val project = Project(uuid, updateProjectCommand.project)
-
-        return EventSource(
-            aggregateId = uuid,
-            payload = objectMapper.writeValueAsString(project),
-            event = ProjectUpdatedEvent(uuid, project)
-        )
+    ) =
+        Project(uuid, updateProjectCommand.project)
+            .let { project ->
+                EventSource(
+                    aggregateId = uuid,
+                    payload = objectMapper.writeValueAsString(project),
+                    event = ProjectUpdatedEvent(uuid, project)
+                )
+            }
             .let(eventSourceService::create)
             .let { EventSourceResponse(it).acceptedResponse() }
-    }
 
     @DeleteMapping("/{projectUuid}")
     fun deleteProject(
         @PathVariable("uuid") clientUuid: String,
         @PathVariable("projectUuid") projectUuid: String
-    ) {
-        customValidator.validateAndThrow(DeleteProjectCommand(clientUuid, projectUuid))
-
-        return EventSource(
-            aggregateId = clientUuid,
-            payload = projectUuid,
-            event = ProjectDeletedEvent(clientUuid, projectUuid)
-        )
+    ) =
+        DeleteProjectCommand(clientUuid, projectUuid)
+            .also(customValidator::validateAndThrow)
+            .let {
+                EventSource(
+                    aggregateId = clientUuid,
+                    payload = projectUuid,
+                    event = ProjectDeletedEvent(clientUuid, projectUuid)
+                )
+            }
             .let(eventSourceService::create)
             .let { EventSourceResponse(it).acceptedResponse() }
-    }
+
 }

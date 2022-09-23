@@ -12,7 +12,6 @@ import com.bory.eventsourcingtutorial.core.domain.EventSource
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
 import javax.validation.Valid
@@ -26,44 +25,48 @@ class ClientCommandController(
     private val customValidator: Validator
 ) {
     @PostMapping
-    fun create(@RequestBody @Valid command: CreateClientCommand): ResponseEntity<EventSourceResponse> {
-        val creatingClient = Client(UUID.randomUUID().toString(), command)
-
-        return EventSource(
-            aggregateId = creatingClient.uuid,
-            payload = objectMapper.writeValueAsString(creatingClient),
-            event = ClientCreatedEvent(creatingClient)
-        )
+    fun create(
+        @RequestBody @Valid command: CreateClientCommand
+    ) =
+        Client(UUID.randomUUID().toString(), command)
+            .let { creatingClient ->
+                EventSource(
+                    aggregateId = creatingClient.uuid,
+                    payload = objectMapper.writeValueAsString(creatingClient),
+                    event = ClientCreatedEvent(creatingClient)
+                )
+            }
             .let(eventSourceService::create)
             .let { EventSourceResponse(it).acceptedResponse() }
-    }
 
     @PutMapping("/{uuid}")
     fun update(
         @PathVariable("uuid") uuid: String,
         @RequestBody @Valid command: UpdateClientCommand
-    ): ResponseEntity<EventSourceResponse> {
-        val updatingClient = Client(uuid, command)
-
-        return EventSource(
-            aggregateId = uuid,
-            payload = objectMapper.writeValueAsString(updatingClient),
-            event = ClientUpdatedEvent(updatingClient)
-        )
+    ) =
+        Client(uuid, command)
+            .let { updatingClient ->
+                EventSource(
+                    aggregateId = uuid,
+                    payload = objectMapper.writeValueAsString(updatingClient),
+                    event = ClientUpdatedEvent(updatingClient)
+                )
+            }
             .let(eventSourceService::create)
             .let { EventSourceResponse(it).acceptedResponse() }
-    }
+
 
     @DeleteMapping("/{uuid}")
-    fun delete(@PathVariable("uuid") uuid: String): ResponseEntity<EventSourceResponse> {
-        customValidator.validateAndThrow(DeleteClientCommand(uuid))
-
-        return EventSource(
-            aggregateId = uuid,
-            event = ClientDeletedEvent(uuid)
-        )
+    fun delete(@PathVariable("uuid") uuid: String) =
+        DeleteClientCommand(uuid)
+            .also(customValidator::validateAndThrow)
+            .let {
+                EventSource(
+                    aggregateId = uuid,
+                    event = ClientDeletedEvent(uuid)
+                )
+            }
             .let(eventSourceService::create)
             .let { EventSourceResponse(it).acceptedResponse() }
-    }
 
 }
