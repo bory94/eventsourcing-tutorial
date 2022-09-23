@@ -1,4 +1,4 @@
-DELETE http://localhost:8080/api/v1/clients/0716e352-6677-487d-aed8-911ac92411c0/projects/0678e1bd-0575-4e0e-a8ed-11ca0c16ef1e
+DELETE http://localhost:8080/api/v1/clients/db6e0f8e-744c-415c-8ba3-fb16ceeb97eb/projects/f0f48f27-82a1-455f-8607-4868ff8fa18d
 
 ###
 

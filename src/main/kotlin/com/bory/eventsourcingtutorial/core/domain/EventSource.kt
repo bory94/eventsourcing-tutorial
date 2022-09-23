@@ -1,5 +1,6 @@
 package com.bory.eventsourcingtutorial.core.domain
 
+import com.bory.eventsourcingtutorial.core.infrastructure.config.JacksonConfig.Companion.customObjectMapper
 import org.springframework.data.annotation.PersistenceCreator
 import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
@@ -30,10 +31,9 @@ class EventSource(
     init {
         if (event != null) {
             type = event.javaClass.canonicalName
-        }
+            payload = customObjectMapper.writeValueAsString(event)
 
-        if (!persisted && event != null) {
-            registerEvent(event)
+            if (!persisted) registerEvent(event)
         }
     }
 

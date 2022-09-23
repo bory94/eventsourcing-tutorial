@@ -11,7 +11,6 @@ import com.bory.eventsourcingtutorial.core.application.dto.EventSourceResponse
 import com.bory.eventsourcingtutorial.core.domain.EventSource
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 import javax.validation.Validator
@@ -19,7 +18,6 @@ import javax.validation.Validator
 @RestController
 @RequestMapping("/api/v1/clients/{uuid}/projects")
 class ProjectCommandController(
-    private val objectMapper: ObjectMapper,
     private val eventSourceService: EventSourceService,
     private val customValidator: Validator
 ) {
@@ -32,7 +30,6 @@ class ProjectCommandController(
             .let { projects ->
                 EventSource(
                     aggregateId = uuid,
-                    payload = objectMapper.writeValueAsString(projects),
                     event = ProjectsAddedEvent(uuid, projects)
                 )
             }
@@ -45,14 +42,10 @@ class ProjectCommandController(
         @PathVariable("uuid") uuid: String,
         @Valid @RequestBody updateProjectCommand: UpdateProjectCommand
     ) =
-        Project(uuid, updateProjectCommand.project)
-            .let { project ->
-                EventSource(
-                    aggregateId = uuid,
-                    payload = objectMapper.writeValueAsString(project),
-                    event = ProjectUpdatedEvent(uuid, project)
-                )
-            }
+        EventSource(
+            aggregateId = uuid,
+            event = ProjectUpdatedEvent(uuid, Project(uuid, updateProjectCommand.project))
+        )
             .let(eventSourceService::create)
             .let { EventSourceResponse(it).acceptedResponse() }
 
@@ -66,7 +59,6 @@ class ProjectCommandController(
             .let {
                 EventSource(
                     aggregateId = clientUuid,
-                    payload = projectUuid,
                     event = ProjectDeletedEvent(clientUuid, projectUuid)
                 )
             }

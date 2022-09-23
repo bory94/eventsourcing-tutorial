@@ -11,7 +11,6 @@ import com.bory.eventsourcingtutorial.core.application.dto.EventSourceResponse
 import com.bory.eventsourcingtutorial.core.domain.EventSource
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.web.bind.annotation.*
 import java.util.*
 import javax.validation.Valid
@@ -20,7 +19,6 @@ import javax.validation.Validator
 @RestController
 @RequestMapping("/api/v1/clients")
 class ClientCommandController(
-    private val objectMapper: ObjectMapper,
     private val eventSourceService: EventSourceService,
     private val customValidator: Validator
 ) {
@@ -32,7 +30,6 @@ class ClientCommandController(
             .let { creatingClient ->
                 EventSource(
                     aggregateId = creatingClient.uuid,
-                    payload = objectMapper.writeValueAsString(creatingClient),
                     event = ClientCreatedEvent(creatingClient)
                 )
             }
@@ -44,14 +41,10 @@ class ClientCommandController(
         @PathVariable("uuid") uuid: String,
         @RequestBody @Valid command: UpdateClientCommand
     ) =
-        Client(uuid, command)
-            .let { updatingClient ->
-                EventSource(
-                    aggregateId = uuid,
-                    payload = objectMapper.writeValueAsString(updatingClient),
-                    event = ClientUpdatedEvent(updatingClient)
-                )
-            }
+        EventSource(
+            aggregateId = uuid,
+            event = ClientUpdatedEvent(Client(uuid, command))
+        )
             .let(eventSourceService::create)
             .let { EventSourceResponse(it).acceptedResponse() }
 

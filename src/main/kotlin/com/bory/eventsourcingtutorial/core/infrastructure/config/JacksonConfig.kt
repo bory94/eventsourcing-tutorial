@@ -10,16 +10,20 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 
 @Configuration
 class JacksonConfig {
+    companion object {
+        val customObjectMapper = ObjectMapper().apply {
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true)
+            registerModule(JavaTimeModule())
+            registerModule(KotlinModule.Builder().build())
+        }
+    }
+
     @Bean
     fun mappingJackson2HttpMessageConverter() = MappingJackson2HttpMessageConverter(
         objectMapper()
     )
 
     @Bean
-    fun objectMapper() = ObjectMapper().apply {
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true)
-        registerModule(JavaTimeModule())
-        registerModule(KotlinModule.Builder().build())
-    }
+    fun objectMapper() = customObjectMapper
 }
