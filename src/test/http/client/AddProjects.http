@@ -1,4 +1,4 @@
-POST http://localhost:8080/api/v1/clients/3db0327a-e9af-4421-9339-d92193695933/projects
+POST http://localhost:8080/api/v1/clients/0716e352-6677-487d-aed8-911ac92411c0/projects
 Content-Type: application/json
 
 < json/AddProjects.json

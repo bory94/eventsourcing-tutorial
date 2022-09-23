@@ -2,16 +2,16 @@
   "client": {
     "name": "Microsoft",
     "phoneNumber": "82-2-554-3210",
-    "address": "82 Gangnam-ro Gangnam-gu Seoul Korea"
-  },
-  "projects": [
-    {
-      "name": "Homepage Renewal",
-      "description": "[NEW] Homepage Renewal Project"
-    },
-    {
-      "name": "Hearth Stone 2nd Edition",
-      "description": "[NEW] New Version Game of Hearth Stone"
-    }
-  ]
+    "address": "82 Gangnam-ro Gangnam-gu Seoul Korea",
+    "projects": [
+      {
+        "name": "Homepage Renewal",
+        "description": "[NEW] Homepage Renewal Project"
+      },
+      {
+        "name": "Hearth Stone 2nd Edition",
+        "description": "[NEW] New Version Game of Hearth Stone"
+      }
+    ]
+  }
 }

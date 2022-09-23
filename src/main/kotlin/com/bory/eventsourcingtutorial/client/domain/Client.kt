@@ -49,7 +49,7 @@ class Client(
         name = command.client.name,
         phoneNumber = command.client.phoneNumber,
         address = command.client.address,
-        projects = command.projects.map {
+        projects = command.client.projects.map {
             Project(
                 name = it.name,
                 description = it.description,
