@@ -66,6 +66,7 @@ class Department(
         name = name,
         description = description,
         deleted = deleted,
+        version = version,
         createdAt = createdAt!!,
         updatedAt = updatedAt!!
     )

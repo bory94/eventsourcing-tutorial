@@ -94,6 +94,8 @@ class Client(
         name = name,
         phoneNumber = phoneNumber,
         address = address,
+        deleted = deleted,
+        version = version,
         createdAt = createdAt!!,
         updatedAt = updatedAt!!,
         projects = projects.map(Project::toDto)

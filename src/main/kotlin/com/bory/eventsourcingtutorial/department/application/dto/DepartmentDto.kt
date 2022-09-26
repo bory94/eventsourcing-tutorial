@@ -13,7 +13,8 @@ data class DepartmentDto(
     @field:NotBlank @field:Length(max = 4000)
     val description: String,
 
-    val deleted: Boolean,
+    val deleted: Boolean = false,
+    val version: Int = 1,
 
     val createdAt: Instant = Instant.now(),
     val updatedAt: Instant = Instant.now()

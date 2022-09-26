@@ -13,15 +13,13 @@ class ClientProjector(
     override fun initialLoad(eventSource: EventSource) =
         objectMapper.readValue(eventSource.payload, ClientCreatedEvent::class.java).client
 
-    override fun processEachEventSource(previous: Client, eventSource: EventSource) =
-        when (eventSource.type) {
-            ClientUpdatedEvent::class.java.canonicalName -> updateClient(previous, eventSource)
-            ClientDeletedEvent::class.java.canonicalName -> deleteClient(previous)
-            ProjectsAddedEvent::class.java.canonicalName -> addProjects(previous, eventSource)
-            ProjectUpdatedEvent::class.java.canonicalName -> updateProject(previous, eventSource)
-            ProjectDeletedEvent::class.java.canonicalName -> deleteProject(previous, eventSource)
-            else -> throw java.lang.IllegalArgumentException("Event Type[${eventSource.type}] Not supported")
-        }
+    override fun eventCases(): Map<Class<out Any>, (Client, EventSource) -> Client> = mapOf(
+        ClientUpdatedEvent::class.java to this::updateClient,
+        ClientDeletedEvent::class.java to this::deleteClient,
+        ProjectsAddedEvent::class.java to this::addProjects,
+        ProjectUpdatedEvent::class.java to this::updateProject,
+        ProjectDeletedEvent::class.java to this::deleteProject
+    )
 
     private fun updateClient(client: Client, eventSource: EventSource) = client.apply {
         val payloadClient =
@@ -29,7 +27,7 @@ class ClientProjector(
         this.updateWith(payloadClient)
     }
 
-    private fun deleteClient(client: Client) = client.delete()
+    private fun deleteClient(client: Client, eventSource: EventSource) = client.delete()
 
     private fun addProjects(client: Client, eventSource: EventSource): Client = client.apply {
         val newProjects =

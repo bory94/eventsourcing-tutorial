@@ -22,6 +22,9 @@ data class ClientDto(
     @field:Length(min = 5, max = 100)
     val address: String,
 
+    val deleted: Boolean = false,
+    val version: Int = 1,
+
     val createdAt: Instant = Instant.now(),
     val updatedAt: Instant = Instant.now(),
 

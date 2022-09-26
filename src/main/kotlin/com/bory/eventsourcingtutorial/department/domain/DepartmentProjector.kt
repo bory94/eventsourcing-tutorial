@@ -15,13 +15,10 @@ class DepartmentProjector(
     override fun initialLoad(eventSource: EventSource): Department =
         objectMapper.readValue(eventSource.payload, DepartmentCreatedEvent::class.java).department
 
-    override fun processEachEventSource(previous: Department, eventSource: EventSource) =
-        when (eventSource.type) {
-            DepartmentUpdatedEvent::class.java.canonicalName ->
-                updateDepartment(previous, eventSource)
-            DepartmentDeletedEvent::class.java.canonicalName -> deleteDepartment(previous)
-            else -> throw java.lang.IllegalArgumentException("Event Type[${eventSource.type}] Not Supported")
-        }
+    override fun eventCases(): Map<Class<out Any>, (Department, EventSource) -> Department> = mapOf(
+        DepartmentUpdatedEvent::class.java to this::updateDepartment,
+        DepartmentDeletedEvent::class.java to this::deleteDepartment
+    )
 
     private fun updateDepartment(department: Department, eventSource: EventSource) =
         department.apply {
@@ -33,5 +30,6 @@ class DepartmentProjector(
             this.updateWith(payloadDepartment)
         }
 
-    private fun deleteDepartment(department: Department) = department.delete()
+    private fun deleteDepartment(department: Department, eventSource: EventSource) =
+        department.delete()
 }
