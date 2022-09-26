@@ -15,7 +15,7 @@ class ClientProjector(
 
     override fun eventCases(): Map<Class<out Any>, (Client, EventSource) -> Client> = mapOf(
         ClientUpdatedEvent::class.java to this::updateClient,
-        ClientDeletedEvent::class.java to this::deleteClient,
+        ClientDeletedEvent::class.java to { client, _ -> client.delete() },
         ProjectsAddedEvent::class.java to this::addProjects,
         ProjectUpdatedEvent::class.java to this::updateProject,
         ProjectDeletedEvent::class.java to this::deleteProject
@@ -26,8 +26,6 @@ class ClientProjector(
             objectMapper.readValue(eventSource.payload!!, ClientUpdatedEvent::class.java).client
         this.updateWith(payloadClient)
     }
-
-    private fun deleteClient(client: Client, eventSource: EventSource) = client.delete()
 
     private fun addProjects(client: Client, eventSource: EventSource): Client = client.apply {
         val newProjects =
@@ -47,7 +45,8 @@ class ClientProjector(
     private fun deleteProject(client: Client, eventSource: EventSource): Client = client.apply {
         val deletingProjectUuid =
             objectMapper.readValue(
-                eventSource.payload!!, ProjectDeletedEvent::class.java
+                eventSource.payload!!,
+                ProjectDeletedEvent::class.java
             ).projectUuid
 
         this.removeProject(deletingProjectUuid)

@@ -1,7 +1,5 @@
 package com.bory.eventsourcingtutorial.department.infrastructure.web
 
-import com.bory.eventsourcingtutorial.core.application.dto.EventSourceResponse
-import com.bory.eventsourcingtutorial.core.domain.EventSource
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
 import com.bory.eventsourcingtutorial.department.application.command.CreateDepartmentCommand
@@ -25,14 +23,9 @@ class DepartmentCommandController(
     @PostMapping
     fun create(@RequestBody @Valid command: CreateDepartmentCommand) =
         Department(UUID.randomUUID().toString(), command)
-            .let { creatingDepartment ->
-                EventSource(
-                    aggregateId = creatingDepartment.uuid,
-                    event = DepartmentCreatedEvent(creatingDepartment)
-                )
+            .let {
+                eventSourceService.storeAndGetResponse(it.uuid, DepartmentCreatedEvent(it))
             }
-            .let(eventSourceService::create)
-            .let { EventSourceResponse(it).acceptedResponse() }
 
     @PutMapping("/{uuid}")
     fun update(
@@ -40,25 +33,15 @@ class DepartmentCommandController(
         @RequestBody @Valid command: UpdateDepartmentCommand
     ) =
         Department(uuid, command)
-            .let { updatingDepartment ->
-                EventSource(
-                    aggregateId = updatingDepartment.uuid,
-                    event = DepartmentUpdatedEvent(updatingDepartment)
-                )
+            .let {
+                eventSourceService.storeAndGetResponse(it.uuid, DepartmentUpdatedEvent(it))
             }
-            .let(eventSourceService::create)
-            .let { EventSourceResponse(it).acceptedResponse() }
 
     @DeleteMapping("/{uuid}")
     fun delete(@PathVariable("uuid") uuid: String) =
         DeleteDepartmentCommand(uuid)
             .also(customValidator::validateAndThrow)
             .let {
-                EventSource(
-                    aggregateId = uuid,
-                    event = DepartmentDeletedEvent(uuid)
-                )
+                eventSourceService.storeAndGetResponse(uuid, DepartmentDeletedEvent(uuid))
             }
-            .let(eventSourceService::create)
-            .let { EventSourceResponse(it).acceptedResponse() }
 }

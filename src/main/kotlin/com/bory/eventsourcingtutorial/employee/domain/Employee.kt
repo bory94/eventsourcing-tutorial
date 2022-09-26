@@ -1,6 +1,8 @@
 package com.bory.eventsourcingtutorial.employee.domain
 
 import com.bory.eventsourcingtutorial.core.domain.AbstractPersistableAggregateRoot
+import com.bory.eventsourcingtutorial.employee.application.command.CreateEmployeeCommand
+import com.bory.eventsourcingtutorial.employee.application.command.UpdateEmployeeCommand
 import org.springframework.data.annotation.PersistenceCreator
 import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
@@ -39,5 +41,23 @@ class Employee(
         version,
         createdAt, updatedAt,
         true
+    )
+
+    constructor(uuid: String, command: CreateEmployeeCommand) : this(
+        uuid,
+        command.employeeDto.name,
+        command.employeeDto.age,
+        command.employeeDto.salary,
+        command.employeeDto.position,
+        command.employeeDto.departmentUuid,
+    )
+
+    constructor(uuid: String, command: UpdateEmployeeCommand) : this(
+        uuid,
+        command.employeeDto.name,
+        command.employeeDto.age,
+        command.employeeDto.salary,
+        command.employeeDto.position,
+        command.employeeDto.departmentUuid,
     )
 }

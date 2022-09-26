@@ -17,7 +17,7 @@ class DepartmentProjector(
 
     override fun eventCases(): Map<Class<out Any>, (Department, EventSource) -> Department> = mapOf(
         DepartmentUpdatedEvent::class.java to this::updateDepartment,
-        DepartmentDeletedEvent::class.java to this::deleteDepartment
+        DepartmentDeletedEvent::class.java to { department, _ -> department.delete() }
     )
 
     private fun updateDepartment(department: Department, eventSource: EventSource) =
@@ -29,7 +29,4 @@ class DepartmentProjector(
 
             this.updateWith(payloadDepartment)
         }
-
-    private fun deleteDepartment(department: Department, eventSource: EventSource) =
-        department.delete()
 }

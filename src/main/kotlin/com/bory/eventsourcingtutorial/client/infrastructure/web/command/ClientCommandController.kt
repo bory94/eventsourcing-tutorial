@@ -7,8 +7,6 @@ import com.bory.eventsourcingtutorial.client.application.event.ClientCreatedEven
 import com.bory.eventsourcingtutorial.client.application.event.ClientDeletedEvent
 import com.bory.eventsourcingtutorial.client.application.event.ClientUpdatedEvent
 import com.bory.eventsourcingtutorial.client.domain.Client
-import com.bory.eventsourcingtutorial.core.application.dto.EventSourceResponse
-import com.bory.eventsourcingtutorial.core.domain.EventSource
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
 import org.springframework.web.bind.annotation.*
@@ -27,39 +25,25 @@ class ClientCommandController(
         @RequestBody @Valid command: CreateClientCommand
     ) =
         Client(UUID.randomUUID().toString(), command)
-            .let { creatingClient ->
-                EventSource(
-                    aggregateId = creatingClient.uuid,
-                    event = ClientCreatedEvent(creatingClient)
-                )
+            .let {
+                eventSourceService.storeAndGetResponse(it.uuid, ClientCreatedEvent(it))
             }
-            .let(eventSourceService::create)
-            .let { EventSourceResponse(it).acceptedResponse() }
 
     @PutMapping("/{uuid}")
     fun update(
         @PathVariable("uuid") uuid: String,
         @RequestBody @Valid command: UpdateClientCommand
     ) =
-        EventSource(
-            aggregateId = uuid,
-            event = ClientUpdatedEvent(Client(uuid, command))
-        )
-            .let(eventSourceService::create)
-            .let { EventSourceResponse(it).acceptedResponse() }
-
+        Client(uuid, command).let {
+            eventSourceService.storeAndGetResponse(uuid, ClientUpdatedEvent(it))
+        }
 
     @DeleteMapping("/{uuid}")
     fun delete(@PathVariable("uuid") uuid: String) =
         DeleteClientCommand(uuid)
             .also(customValidator::validateAndThrow)
             .let {
-                EventSource(
-                    aggregateId = uuid,
-                    event = ClientDeletedEvent(uuid)
-                )
+                eventSourceService.storeAndGetResponse(uuid, ClientDeletedEvent(uuid))
             }
-            .let(eventSourceService::create)
-            .let { EventSourceResponse(it).acceptedResponse() }
 
 }

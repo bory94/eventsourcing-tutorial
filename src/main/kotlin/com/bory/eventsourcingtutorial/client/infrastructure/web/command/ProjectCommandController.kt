@@ -7,8 +7,6 @@ import com.bory.eventsourcingtutorial.client.application.event.ProjectDeletedEve
 import com.bory.eventsourcingtutorial.client.application.event.ProjectUpdatedEvent
 import com.bory.eventsourcingtutorial.client.application.event.ProjectsAddedEvent
 import com.bory.eventsourcingtutorial.client.domain.Project
-import com.bory.eventsourcingtutorial.core.application.dto.EventSourceResponse
-import com.bory.eventsourcingtutorial.core.domain.EventSource
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
 import org.springframework.web.bind.annotation.*
@@ -27,27 +25,19 @@ class ProjectCommandController(
         @Valid @RequestBody addProjectsCommand: AddProjectsCommand
     ) =
         addProjectsCommand.projects.map { Project(uuid, it) }
-            .let { projects ->
-                EventSource(
-                    aggregateId = uuid,
-                    event = ProjectsAddedEvent(uuid, projects)
-                )
+            .let {
+                eventSourceService.storeAndGetResponse(uuid, ProjectsAddedEvent(uuid, it))
             }
-            .let(eventSourceService::create)
-            .let { EventSourceResponse(it).acceptedResponse() }
-
 
     @PutMapping
     fun updateProject(
         @PathVariable("uuid") uuid: String,
         @Valid @RequestBody updateProjectCommand: UpdateProjectCommand
     ) =
-        EventSource(
-            aggregateId = uuid,
-            event = ProjectUpdatedEvent(uuid, Project(uuid, updateProjectCommand.project))
-        )
-            .let(eventSourceService::create)
-            .let { EventSourceResponse(it).acceptedResponse() }
+        Project(uuid, updateProjectCommand.project)
+            .let {
+                eventSourceService.storeAndGetResponse(uuid, ProjectUpdatedEvent(uuid, it))
+            }
 
     @DeleteMapping("/{projectUuid}")
     fun deleteProject(
@@ -57,12 +47,9 @@ class ProjectCommandController(
         DeleteProjectCommand(clientUuid, projectUuid)
             .also(customValidator::validateAndThrow)
             .let {
-                EventSource(
-                    aggregateId = clientUuid,
-                    event = ProjectDeletedEvent(clientUuid, projectUuid)
+                eventSourceService.storeAndGetResponse(
+                    clientUuid, ProjectDeletedEvent(clientUuid, projectUuid)
                 )
             }
-            .let(eventSourceService::create)
-            .let { EventSourceResponse(it).acceptedResponse() }
 
 }
