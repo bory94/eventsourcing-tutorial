@@ -14,10 +14,11 @@ class EventSource(
     version: Int = 1,
     var payload: String? = null,
     createdAt: Instant? = null,
+    updatedAt: Instant? = null,
     persisted: Boolean = false,
     @field:org.springframework.data.annotation.Transient
     val event: Any? = null
-) : AbstractPersistableAggregateRoot(uuid, version, createdAt, persisted) {
+) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt, persisted) {
     @PersistenceCreator
     constructor(
         uuid: String,
@@ -25,8 +26,9 @@ class EventSource(
         aggregateId: String?,
         version: Int,
         payload: String?,
-        createdAt: Instant
-    ) : this(uuid, type, aggregateId, version, payload, createdAt, true, null)
+        createdAt: Instant,
+        updatedAt: Instant
+    ) : this(uuid, type, aggregateId, version, payload, createdAt, updatedAt, true, null)
 
     init {
         if (event != null) {

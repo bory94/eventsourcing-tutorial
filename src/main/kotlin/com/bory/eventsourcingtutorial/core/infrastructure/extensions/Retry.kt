@@ -22,9 +22,9 @@ fun <R> retry(
             Either(null, throwable)
         }
 
-    fun sleepingTime(i: Int) = (
-            if (exponentialSleep) sleepingDuration.toMillis().toDouble().pow(i - 1) else 1.0
-            ).toLong()
+    fun sleepingTime(i: Int) =
+        sleepingDuration.toMillis().toDouble().pow(if (exponentialSleep) i - 1 else 1).toLong()
+
 
     var either: Either<R>? = null
     for (i in 1..times) {
@@ -35,6 +35,7 @@ fun <R> retry(
             throw either.throwable!!
 
         LOGGER.debug("Retrying #${i}: $block throws ${either.throwable!!.javaClass.canonicalName} ::: ${either.throwable!!.message}")
+        LOGGER.debug("i = $i ::: times = $times")
         if (i != times) {
             try {
                 Thread.sleep(sleepingTime(i))

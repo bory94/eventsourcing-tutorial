@@ -44,7 +44,7 @@ class ClientEventListener(
             val loadedClient = clientRepository.findById(event.clientUuid)
                 .orElseThrow { throw NoSuchClientException("No Such Client[${event.clientUuid}] found") }
 
-            loadedClient.deleteClient()
+            loadedClient.delete()
 
             clientRepository.save(loadedClient)
         }

@@ -1,8 +1,8 @@
 package com.bory.eventsourcingtutorial.core.infrastructure.persistence
 
 import com.bory.eventsourcingtutorial.core.domain.EventSource
-import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.PagingAndSortingRepository
 
-interface EventSourceRepository : CrudRepository<EventSource, String> {
+interface EventSourceRepository : PagingAndSortingRepository<EventSource, String> {
     fun findByAggregateIdOrderByCreatedAt(aggregateId: String): List<EventSource>
 }

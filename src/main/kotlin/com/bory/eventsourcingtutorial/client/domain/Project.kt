@@ -28,4 +28,13 @@ data class Project(
         description = newProject.description
         updatedAt = Instant.now()
     }
+
+    fun toDto() = ProjectDto(
+        uuid = uuid,
+        name = name,
+        description = description,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        clientUuid = clientUuid
+    )
 }

@@ -3,6 +3,7 @@ package com.bory.eventsourcingtutorial.core.domain
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.annotation.Version
 import org.springframework.data.domain.AbstractAggregateRoot
 import org.springframework.data.domain.AfterDomainEventPublication
@@ -18,6 +19,8 @@ abstract class AbstractPersistableAggregateRoot(
     var version: Int = 1,
     @field:CreatedDate
     var createdAt: Instant? = null,
+    @field:LastModifiedDate
+    var updatedAt: Instant? = null,
     @field:org.springframework.data.annotation.Transient
     var persisted: Boolean = true
 ) : AbstractAggregateRoot<AbstractPersistableAggregateRoot>(), Persistable<String> {

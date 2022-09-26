@@ -6,6 +6,7 @@ CREATE TABLE event_source
     version      int          not null default 1,
     payload      TEXT,
     created_at   timestamp    not null default current_timestamp,
+    updated_at   timestamp    not null default current_timestamp,
 
     primary key (uuid)
 );
@@ -47,3 +48,43 @@ CREATE TABLE project
 create index idx_project_name on project (name);
 create index idx_project_created_at on project (created_at);
 create index idx_project_updated_at on project (updated_at);
+
+CREATE TABLE department
+(
+    uuid        varchar(36)   not null,
+    name        varchar(100)  not null,
+    description varchar(4000) not null,
+    deleted     bit           not null default false,
+    version     int           not null default 1,
+    created_at  timestamp     not null default current_timestamp,
+    updated_at  timestamp     not null default current_timestamp,
+
+    primary key (uuid)
+);
+
+create index idx_department_name on department (name);
+create index idx_department_created_at on department (created_at);
+create index idx_department_updated_at on department (updated_at);
+
+CREATE TABLE employee
+(
+    uuid            varchar(36) not null,
+    name            varchar(36) not null,
+    age             int         not null default 1,
+    salary          int         not null default 1,
+    position        varchar(20) not null,
+    deleted         bit         not null default false,
+    version         int         not null default 1,
+    created_at      timestamp   not null default current_timestamp,
+    updated_at      timestamp   not null default current_timestamp,
+
+    department_uuid varchar(36) not null,
+
+    primary key (uuid),
+    foreign key (department_uuid) references department (uuid)
+);
+
+create index idx_employee_name on employee (name);
+create index idx_employee_position on employee (position);
+create index idx_employee_created_at on employee (created_at);
+create index idx_employee_updated_at on employee (updated_at);

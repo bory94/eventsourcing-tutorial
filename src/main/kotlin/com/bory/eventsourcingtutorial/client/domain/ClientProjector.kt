@@ -1,6 +1,7 @@
 package com.bory.eventsourcingtutorial.client.domain
 
 import com.bory.eventsourcingtutorial.client.application.event.*
+import com.bory.eventsourcingtutorial.core.domain.AggregateRootProjector
 import com.bory.eventsourcingtutorial.core.domain.EventSource
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Component
@@ -8,27 +9,19 @@ import org.springframework.stereotype.Component
 @Component
 class ClientProjector(
     private val objectMapper: ObjectMapper
-) {
-    fun project(eventSources: List<EventSource>): Client {
-        val initial =
-            objectMapper.readValue(eventSources[0].payload, ClientCreatedEvent::class.java).client
-        initial.createdAt = eventSources[0].createdAt
-        initial.updatedAt = eventSources[0].createdAt
+) : AggregateRootProjector<Client> {
+    override fun initialLoad(eventSource: EventSource) =
+        objectMapper.readValue(eventSource.payload, ClientCreatedEvent::class.java).client
 
-        return eventSources.subList(1, eventSources.size).fold(initial) { client, eventSource ->
-            when (eventSource.type) {
-                ClientUpdatedEvent::class.java.canonicalName -> updateClient(client, eventSource)
-                ClientDeletedEvent::class.java.canonicalName -> deleteClient(client)
-                ProjectsAddedEvent::class.java.canonicalName -> addProjects(client, eventSource)
-                ProjectUpdatedEvent::class.java.canonicalName -> updateProject(client, eventSource)
-                ProjectDeletedEvent::class.java.canonicalName -> deleteProject(client, eventSource)
-                else -> throw java.lang.IllegalArgumentException("Event Type[${eventSource.type}] Not supported")
-            }.apply {
-                version += 1
-                updatedAt = eventSource.createdAt
-            }
+    override fun processEachEventSource(previous: Client, eventSource: EventSource) =
+        when (eventSource.type) {
+            ClientUpdatedEvent::class.java.canonicalName -> updateClient(previous, eventSource)
+            ClientDeletedEvent::class.java.canonicalName -> deleteClient(previous)
+            ProjectsAddedEvent::class.java.canonicalName -> addProjects(previous, eventSource)
+            ProjectUpdatedEvent::class.java.canonicalName -> updateProject(previous, eventSource)
+            ProjectDeletedEvent::class.java.canonicalName -> deleteProject(previous, eventSource)
+            else -> throw java.lang.IllegalArgumentException("Event Type[${eventSource.type}] Not supported")
         }
-    }
 
     private fun updateClient(client: Client, eventSource: EventSource) = client.apply {
         val payloadClient =
@@ -36,7 +29,7 @@ class ClientProjector(
         this.updateWith(payloadClient)
     }
 
-    private fun deleteClient(client: Client) = client.deleteClient()
+    private fun deleteClient(client: Client) = client.delete()
 
     private fun addProjects(client: Client, eventSource: EventSource): Client = client.apply {
         val newProjects =

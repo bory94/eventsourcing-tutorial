@@ -2,9 +2,9 @@ package com.bory.eventsourcingtutorial.client.domain
 
 import com.bory.eventsourcingtutorial.client.application.command.CreateClientCommand
 import com.bory.eventsourcingtutorial.client.application.command.UpdateClientCommand
+import com.bory.eventsourcingtutorial.client.application.dto.ClientDto
 import com.bory.eventsourcingtutorial.client.domain.exception.NoSuchProjectException
 import com.bory.eventsourcingtutorial.core.domain.AbstractPersistableAggregateRoot
-import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.annotation.PersistenceCreator
 import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
@@ -20,14 +20,13 @@ class Client(
     var deleted: Boolean = false,
     version: Int = 1,
     createdAt: Instant? = null,
-    @field:LastModifiedDate
-    var updatedAt: Instant? = null,
+    updatedAt: Instant? = null,
 
     @MappedCollection(idColumn = "client_uuid", keyColumn = "uuid")
     var projects: List<Project> = mutableListOf(),
 
     persisted: Boolean = false
-) : AbstractPersistableAggregateRoot(uuid, version, createdAt, persisted) {
+) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt, persisted) {
 
     @PersistenceCreator
     constructor(
@@ -71,7 +70,7 @@ class Client(
         phoneNumber = updatingClient.phoneNumber
     }
 
-    fun deleteClient() = this.apply {
+    fun delete() = this.apply {
         this.deleted = true
     }
 
@@ -89,6 +88,17 @@ class Client(
         projects -= projects.find { it.uuid == projectUuid }
             ?: throw NoSuchProjectException("No Such Project[$projectUuid] found")
     }
+
+    fun toDto() = ClientDto(
+        uuid = uuid,
+        name = name,
+        phoneNumber = phoneNumber,
+        address = address,
+        createdAt = createdAt!!,
+        updatedAt = updatedAt!!,
+        projects = projects.map(Project::toDto)
+
+    )
 
     override fun toString(): String {
         return """

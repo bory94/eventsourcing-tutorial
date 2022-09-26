@@ -1,6 +1,6 @@
 package com.bory.eventsourcingtutorial.client.infrastructure.web.query
 
-import com.bory.eventsourcingtutorial.client.domain.Client
+import com.bory.eventsourcingtutorial.client.application.dto.ClientDto
 import com.bory.eventsourcingtutorial.client.domain.ClientProjector
 import com.bory.eventsourcingtutorial.client.domain.exception.NoSuchClientException
 import com.bory.eventsourcingtutorial.client.infrastructure.persistence.ClientRepository
@@ -20,16 +20,17 @@ class ClientQueryController(
     private val clientProjector: ClientProjector
 ) {
     @GetMapping("/{aggregateId}")
-    fun projectClient(@PathVariable("aggregateId") aggregateId: String): Client {
+    fun projectClient(@PathVariable("aggregateId") aggregateId: String): ClientDto {
         val eventSources = eventSourceRepository.findByAggregateIdOrderByCreatedAt(aggregateId)
         if (eventSources.isEmpty()) throw NoSuchClientException("EventSource for AggregateId[$aggregateId] not found")
 
-        return clientProjector.project(eventSources)
+        return clientProjector.project(eventSources).toDto()
     }
 
     @GetMapping("/snapshot/{uuid}")
-    fun snapshotClient(@PathVariable("uuid") uuid: String): Client =
+    fun snapshotClient(@PathVariable("uuid") uuid: String): ClientDto =
         clientRepository.findById(uuid)
             .orElseThrow { NoSuchClientException("Client for uuid[$uuid] not found") }
+            .toDto()
 
 }
