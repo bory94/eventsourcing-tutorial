@@ -9,7 +9,7 @@ private val LOGGER: Logger =
     LoggerFactory.getLogger("com.bory.eventsourcingtutorial.infrastructure.extensions.Retry")
 
 fun <R> retry(
-    times: Int = 5,
+    times: Int = 3,
     sleepingDuration: Duration = Duration.ofSeconds(2),
     exponentialSleep: Boolean = false,
     skipRetryExceptions: Array<Class<out Throwable>> = emptyArray(),

@@ -8,13 +8,14 @@ import com.bory.eventsourcingtutorial.client.application.event.ClientDeletedEven
 import com.bory.eventsourcingtutorial.client.application.event.ClientUpdatedEvent
 import com.bory.eventsourcingtutorial.client.domain.Client
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
+import com.bory.eventsourcingtutorial.core.infrastructure.annotations.CommandController
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
 import org.springframework.web.bind.annotation.*
 import java.util.*
 import javax.validation.Valid
 import javax.validation.Validator
 
-@RestController
+@CommandController
 @RequestMapping("/api/v1/clients")
 class ClientCommandController(
     private val eventSourceService: EventSourceService,

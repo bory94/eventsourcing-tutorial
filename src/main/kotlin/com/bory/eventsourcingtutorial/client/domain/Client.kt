@@ -80,13 +80,27 @@ class Client(
 
     fun updateProject(updatingProject: Project) = this.apply {
         val project = projects.firstOrNull { it.uuid == updatingProject.uuid }
-            ?: throw NoSuchProjectException("No Such Project[${updatingProject.uuid}] found")
+            ?: throw NoSuchProjectException("Project uuid[${updatingProject.uuid}] not found.")
         project.updateWith(updatingProject)
     }
 
     fun removeProject(projectUuid: String) = this.apply {
         projects -= projects.find { it.uuid == projectUuid }
-            ?: throw NoSuchProjectException("No Such Project[$projectUuid] found")
+            ?: throw NoSuchProjectException("Project uuid[$projectUuid] not found.")
+    }
+
+    fun assignProjectTeamMember(projectUuid: String, employeeUuid: String) = this.apply {
+        val project = projects.find { it.uuid == projectUuid }
+            ?: throw NoSuchProjectException("Project uuid[$projectUuid] not found.")
+
+        project.assignTeamMember(employeeUuid)
+    }
+
+    fun unassignProjectTeamMember(projectUuid: String, employeeUuid: String) = this.apply {
+        val project = projects.find { it.uuid == projectUuid }
+            ?: throw NoSuchProjectException("Project uuid[$projectUuid] not found.")
+
+        project.unassignTeamMember(employeeUuid)
     }
 
     fun toDto() = ClientDto(

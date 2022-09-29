@@ -1,6 +1,7 @@
-package com.bory.eventsourcingtutorial.department.infrastructure.web
+package com.bory.eventsourcingtutorial.department.infrastructure.web.command
 
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
+import com.bory.eventsourcingtutorial.core.infrastructure.annotations.CommandController
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
 import com.bory.eventsourcingtutorial.department.application.command.CreateDepartmentCommand
 import com.bory.eventsourcingtutorial.department.application.command.DeleteDepartmentCommand
@@ -14,7 +15,7 @@ import java.util.*
 import javax.validation.Valid
 import javax.validation.Validator
 
-@RestController
+@CommandController
 @RequestMapping("/api/v1/departments")
 class DepartmentCommandController(
     private val eventSourceService: EventSourceService,

@@ -1,6 +1,7 @@
-package com.bory.eventsourcingtutorial.employee.infrastructure.web
+package com.bory.eventsourcingtutorial.employee.infrastructure.web.command
 
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
+import com.bory.eventsourcingtutorial.core.infrastructure.annotations.CommandController
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
 import com.bory.eventsourcingtutorial.employee.application.command.*
 import com.bory.eventsourcingtutorial.employee.application.event.*
@@ -10,7 +11,7 @@ import java.util.*
 import javax.validation.Valid
 import javax.validation.Validator
 
-@RestController
+@CommandController
 @RequestMapping("/api/v1/employees")
 class EmployeeCommandController(
     private val eventSourceService: EventSourceService,
@@ -38,7 +39,7 @@ class EmployeeCommandController(
                 eventSourceService.storeAndGetResponse(uuid, EmployeeDeletedEvent(uuid))
             }
 
-    @PostMapping("/assign/{employeeUuid}/project/{projectUuid}")
+    @PostMapping("/{employeeUuid}/project/{projectUuid}")
     fun assignToProject(
         @PathVariable("employeeUuid") employeeUuid: String,
         @PathVariable("projectUuid") projectUuid: String
@@ -51,7 +52,7 @@ class EmployeeCommandController(
             )
         }
 
-    @DeleteMapping("/assign/{employeeUuid}/project/{projectUuid}")
+    @DeleteMapping("/{employeeUuid}/project/{projectUuid}")
     fun unassignFromProject(
         @PathVariable("employeeUuid") employeeUuid: String,
         @PathVariable("projectUuid") projectUuid: String
@@ -68,7 +69,7 @@ class EmployeeCommandController(
     fun moveToDepartment(
         @PathVariable("employeeUuid") employeeUuid: String,
         @PathVariable("departmentUuid") departmentUuid: String
-    ) = MoveEmployeeDepartmentCommand(employeeUuid, departmentUuid)
+    ) = MoveEmployeeToDepartmentCommand(employeeUuid, departmentUuid)
         .also(customValidator::validateAndThrow)
         .let {
             eventSourceService.storeAndGetResponse(

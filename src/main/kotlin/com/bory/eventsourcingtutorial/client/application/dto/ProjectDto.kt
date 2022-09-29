@@ -21,5 +21,7 @@ data class ProjectDto(
     val updatedAt: Instant = Instant.now(),
 
     @field:NotBlank(groups = [NotInCreatingContext::class])
-    val clientUuid: String? = null
+    val clientUuid: String? = null,
+
+    val projectAssignees: List<ProjectAssigneeDto> = mutableListOf()
 )

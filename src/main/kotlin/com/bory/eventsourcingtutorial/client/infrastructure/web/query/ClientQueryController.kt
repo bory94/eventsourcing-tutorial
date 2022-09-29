@@ -1,17 +1,16 @@
 package com.bory.eventsourcingtutorial.client.infrastructure.web.query
 
 import com.bory.eventsourcingtutorial.client.application.dto.ClientDto
-import com.bory.eventsourcingtutorial.client.domain.ClientProjector
 import com.bory.eventsourcingtutorial.client.domain.exception.NoSuchClientException
 import com.bory.eventsourcingtutorial.client.infrastructure.persistence.ClientRepository
+import com.bory.eventsourcingtutorial.core.infrastructure.annotations.QueryController
 import com.bory.eventsourcingtutorial.core.infrastructure.persistence.EventSourceRepository
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 
-@RestController
+@QueryController
 @Transactional(readOnly = true)
 @RequestMapping("/api/v1/clients")
 class ClientQueryController(

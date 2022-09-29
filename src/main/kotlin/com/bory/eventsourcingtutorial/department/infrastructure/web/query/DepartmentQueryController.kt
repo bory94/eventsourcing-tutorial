@@ -1,21 +1,20 @@
-package com.bory.eventsourcingtutorial.department.infrastructure.web
+package com.bory.eventsourcingtutorial.department.infrastructure.web.query
 
 import com.bory.eventsourcingtutorial.client.domain.exception.NoSuchClientException
+import com.bory.eventsourcingtutorial.core.infrastructure.annotations.QueryController
 import com.bory.eventsourcingtutorial.core.infrastructure.persistence.EventSourceRepository
 import com.bory.eventsourcingtutorial.department.application.dto.DepartmentDto
-import com.bory.eventsourcingtutorial.department.domain.DepartmentProjector
 import com.bory.eventsourcingtutorial.department.domain.exception.NoSuchDepartmentException
 import com.bory.eventsourcingtutorial.department.infrastructure.persistence.DepartmentRepository
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 
-@RestController
+@QueryController
 @Transactional(readOnly = true)
 @RequestMapping("/api/v1/departments")
-class DepartmentQueryCommand(
+class DepartmentQueryController(
     private val eventSourceRepository: EventSourceRepository,
     private val departmentProjector: DepartmentProjector,
     private val departmentRepository: DepartmentRepository

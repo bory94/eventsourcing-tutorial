@@ -8,12 +8,13 @@ import com.bory.eventsourcingtutorial.client.application.event.ProjectUpdatedEve
 import com.bory.eventsourcingtutorial.client.application.event.ProjectsAddedEvent
 import com.bory.eventsourcingtutorial.client.domain.Project
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
+import com.bory.eventsourcingtutorial.core.infrastructure.annotations.CommandController
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 import javax.validation.Validator
 
-@RestController
+@CommandController
 @RequestMapping("/api/v1/clients/{uuid}/projects")
 class ProjectCommandController(
     private val eventSourceService: EventSourceService,

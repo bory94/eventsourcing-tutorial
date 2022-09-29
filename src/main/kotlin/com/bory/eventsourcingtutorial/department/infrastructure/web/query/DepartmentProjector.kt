@@ -1,14 +1,15 @@
-package com.bory.eventsourcingtutorial.department.domain
+package com.bory.eventsourcingtutorial.department.infrastructure.web.query
 
 import com.bory.eventsourcingtutorial.core.domain.AggregateRootProjector
 import com.bory.eventsourcingtutorial.core.domain.EventSource
+import com.bory.eventsourcingtutorial.core.infrastructure.annotations.DomainProjector
 import com.bory.eventsourcingtutorial.department.application.event.DepartmentCreatedEvent
 import com.bory.eventsourcingtutorial.department.application.event.DepartmentDeletedEvent
 import com.bory.eventsourcingtutorial.department.application.event.DepartmentUpdatedEvent
+import com.bory.eventsourcingtutorial.department.domain.Department
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.stereotype.Component
 
-@Component
+@DomainProjector
 class DepartmentProjector(
     private val objectMapper: ObjectMapper
 ) : AggregateRootProjector<Department> {

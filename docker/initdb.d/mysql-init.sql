@@ -88,3 +88,38 @@ create index idx_employee_name on employee (name);
 create index idx_employee_position on employee (position);
 create index idx_employee_created_at on employee (created_at);
 create index idx_employee_updated_at on employee (updated_at);
+
+CREATE TABLE employee_project
+(
+    uuid          varchar(36) not null,
+    employee_uuid varchar(36) not null,
+    client_uuid   varchar(36) not null,
+    project_uuid  varchar(36) not null,
+    created_at    timestamp   not null default current_timestamp,
+    primary key (uuid),
+    foreign key (employee_uuid) references employee (uuid),
+    foreign key (client_uuid) references client (uuid),
+    foreign key (project_uuid) references project (uuid)
+);
+
+CREATE TABLE department_team_member
+(
+    uuid            varchar(36) not null,
+    department_uuid varchar(36) not null,
+    employee_uuid   varchar(36) not null,
+    created_at      timestamp   not null default current_timestamp,
+    primary key (uuid),
+    foreign key (department_uuid) references department (uuid),
+    foreign key (employee_uuid) references employee (uuid)
+);
+
+CREATE TABLE project_assignee
+(
+    uuid          varchar(36) not null,
+    project_uuid  varchar(36) not null,
+    employee_uuid varchar(36) not null,
+    created_at    timestamp   not null default current_timestamp,
+    primary key (uuid),
+    foreign key (project_uuid) references project (uuid),
+    foreign key (employee_uuid) references employee (uuid)
+);

@@ -5,6 +5,7 @@ import com.bory.eventsourcingtutorial.department.application.command.CreateDepar
 import com.bory.eventsourcingtutorial.department.application.command.UpdateDepartmentCommand
 import com.bory.eventsourcingtutorial.department.application.dto.DepartmentDto
 import org.springframework.data.annotation.PersistenceCreator
+import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 import java.time.Instant
 import java.util.*
@@ -19,6 +20,9 @@ class Department(
     createdAt: Instant? = null,
     updatedAt: Instant? = null,
 
+    @MappedCollection(idColumn = "uuid", keyColumn = "employee_uuid")
+    var departmentTeamMembers: List<DepartmentTeamMember> = mutableListOf(),
+
     persisted: Boolean = false
 ) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt, persisted) {
     @PersistenceCreator
@@ -27,12 +31,13 @@ class Department(
         name: String, description: String, deleted: Boolean,
         version: Int,
         createdAt: Instant,
-        updatedAt: Instant
+        updatedAt: Instant,
     ) : this(
         uuid,
         name, description, deleted,
         version,
         createdAt, updatedAt,
+        mutableListOf(),
         true
     )
 
@@ -61,6 +66,10 @@ class Department(
         deleted = true
     }
 
+    fun addTeamMember(employeeUuid: String) = this.apply {
+        departmentTeamMembers += DepartmentTeamMember(employeeUuid = employeeUuid)
+    }
+
     fun toDto() = DepartmentDto(
         uuid = uuid,
         name = name,
@@ -68,6 +77,7 @@ class Department(
         deleted = deleted,
         version = version,
         createdAt = createdAt!!,
-        updatedAt = updatedAt!!
+        updatedAt = updatedAt!!,
+        departmentTeamMembers = departmentTeamMembers.map(DepartmentTeamMember::toDto)
     )
 }

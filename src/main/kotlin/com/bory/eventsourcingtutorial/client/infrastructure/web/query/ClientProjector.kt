@@ -1,12 +1,13 @@
-package com.bory.eventsourcingtutorial.client.domain
+package com.bory.eventsourcingtutorial.client.infrastructure.web.query
 
 import com.bory.eventsourcingtutorial.client.application.event.*
+import com.bory.eventsourcingtutorial.client.domain.Client
 import com.bory.eventsourcingtutorial.core.domain.AggregateRootProjector
 import com.bory.eventsourcingtutorial.core.domain.EventSource
+import com.bory.eventsourcingtutorial.core.infrastructure.annotations.DomainProjector
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.stereotype.Component
 
-@Component
+@DomainProjector
 class ClientProjector(
     private val objectMapper: ObjectMapper
 ) : AggregateRootProjector<Client> {
@@ -18,7 +19,9 @@ class ClientProjector(
         ClientDeletedEvent::class.java to { client, _ -> client.delete() },
         ProjectsAddedEvent::class.java to this::addProjects,
         ProjectUpdatedEvent::class.java to this::updateProject,
-        ProjectDeletedEvent::class.java to this::deleteProject
+        ProjectDeletedEvent::class.java to this::deleteProject,
+        ProjectTeamMemberAssignedEvent::class.java to this::assignTeamMember,
+        ProjectTeamMemberUnassignedEvent::class.java to this::unassignTeamMember
     )
 
     private fun updateClient(client: Client, eventSource: EventSource) = client.apply {
@@ -27,14 +30,14 @@ class ClientProjector(
         this.updateWith(payloadClient)
     }
 
-    private fun addProjects(client: Client, eventSource: EventSource): Client = client.apply {
+    private fun addProjects(client: Client, eventSource: EventSource) = client.apply {
         val newProjects =
             objectMapper.readValue(eventSource.payload!!, ProjectsAddedEvent::class.java).projects
 
         this.addProject(newProjects)
     }
 
-    private fun updateProject(client: Client, eventSource: EventSource): Client = client.apply {
+    private fun updateProject(client: Client, eventSource: EventSource) = client.apply {
         val updatingProject =
             objectMapper.readValue(eventSource.payload!!, ProjectUpdatedEvent::class.java).project
 
@@ -42,13 +45,31 @@ class ClientProjector(
         project?.updateWith(updatingProject)
     }
 
-    private fun deleteProject(client: Client, eventSource: EventSource): Client = client.apply {
+    private fun deleteProject(client: Client, eventSource: EventSource) = client.apply {
         val deletingProjectUuid =
             objectMapper.readValue(
                 eventSource.payload!!,
                 ProjectDeletedEvent::class.java
             ).projectUuid
 
-        this.removeProject(deletingProjectUuid)
+        removeProject(deletingProjectUuid)
+    }
+
+    private fun assignTeamMember(client: Client, eventSource: EventSource) = client.apply {
+        val event = objectMapper.readValue(
+            eventSource.payload!!,
+            ProjectTeamMemberAssignedEvent::class.java
+        )
+
+        assignProjectTeamMember(event.projectUuid, event.teamMemberUuid)
+    }
+
+    private fun unassignTeamMember(client: Client, eventSource: EventSource) = client.apply {
+        val event = objectMapper.readValue(
+            eventSource.payload!!,
+            ProjectTeamMemberUnassignedEvent::class.java
+        )
+
+        unassignProjectTeamMember(event.projectUuid, event.teamMemberUuid)
     }
 }

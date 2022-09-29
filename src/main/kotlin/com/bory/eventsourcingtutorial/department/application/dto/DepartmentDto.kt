@@ -17,5 +17,7 @@ data class DepartmentDto(
     val version: Int = 1,
 
     val createdAt: Instant = Instant.now(),
-    val updatedAt: Instant = Instant.now()
+    val updatedAt: Instant = Instant.now(),
+
+    val departmentTeamMembers: List<DepartmentTeamMemberDto> = listOf()
 )
