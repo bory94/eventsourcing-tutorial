@@ -1,6 +1,7 @@
 package com.bory.eventsourcingtutorial.core.domain
 
 import com.bory.eventsourcingtutorial.core.application.dto.EventSourceResponse
+import com.bory.eventsourcingtutorial.core.application.event.AbstractCustomEvent
 import com.bory.eventsourcingtutorial.core.infrastructure.persistence.EventSourceRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -10,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional
 class EventSourceService(
     private val eventSourceRepository: EventSourceRepository
 ) {
-    fun storeAndGetResponse(aggregateId: String, event: Any) =
-        EventSource(aggregateId = aggregateId, event = event)
+    fun store(event: AbstractCustomEvent) =
+        EventSource(aggregateId = event.aggregateUuid, event = event)
             .let(eventSourceRepository::save)
             .let(::EventSourceResponse)
 }

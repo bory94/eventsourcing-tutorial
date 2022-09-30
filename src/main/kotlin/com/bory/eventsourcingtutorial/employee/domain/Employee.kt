@@ -6,6 +6,7 @@ import com.bory.eventsourcingtutorial.employee.application.command.CreateEmploye
 import com.bory.eventsourcingtutorial.employee.application.command.UpdateEmployeeCommand
 import com.bory.eventsourcingtutorial.employee.application.dto.EmployeeDto
 import com.bory.eventsourcingtutorial.employee.application.enum.DepartmentMoveStatus
+import com.bory.eventsourcingtutorial.employee.application.enum.EmployeePosition
 import com.bory.eventsourcingtutorial.employee.application.enum.ProjectAssignStatus
 import com.bory.eventsourcingtutorial.employee.application.event.*
 import org.springframework.data.annotation.PersistenceCreator
@@ -20,7 +21,7 @@ class Employee(
     var name: String,
     var age: Int,
     var salary: Int,
-    var position: String,
+    var position: EmployeePosition,
     var departmentUuid: String,
     var departmentMoveStatus: DepartmentMoveStatus = DepartmentMoveStatus.MOVING_ACCEPTED,
     var deleted: Boolean = false,
@@ -37,7 +38,7 @@ class Employee(
     constructor(
         uuid: String,
 
-        name: String, age: Int, salary: Int, position: String,
+        name: String, age: Int, salary: Int, position: EmployeePosition,
         departmentUuid: String, departmentMoveStatus: DepartmentMoveStatus, deleted: Boolean,
 
         version: Int,
@@ -106,7 +107,7 @@ class Employee(
             ?: throw NoSuchProjectException("Project uuid[$uuid] not found.")
 
         project.status = ProjectAssignStatus.UNASSIGNING_REQUESTED
-        
+
         registerEvent(EmployeeUnassignRequestedFromProjectEvent(this.uuid, projectUuid))
     }
 

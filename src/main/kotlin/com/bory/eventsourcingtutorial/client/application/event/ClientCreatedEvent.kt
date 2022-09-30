@@ -5,4 +5,4 @@ import com.bory.eventsourcingtutorial.core.application.event.AbstractCustomEvent
 
 data class ClientCreatedEvent(
     val client: Client
-) : AbstractCustomEvent()
+) : AbstractCustomEvent(aggregateUuid = client.uuid)

@@ -6,4 +6,4 @@ import com.bory.eventsourcingtutorial.core.application.event.AbstractCustomEvent
 data class ProjectUpdatedEvent(
     val clientUuid: String,
     val project: Project
-) : AbstractCustomEvent()
+) : AbstractCustomEvent(aggregateUuid = clientUuid)

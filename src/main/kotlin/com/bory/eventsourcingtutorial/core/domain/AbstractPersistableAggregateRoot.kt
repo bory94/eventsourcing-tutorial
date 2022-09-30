@@ -49,4 +49,6 @@ abstract class AbstractPersistableAggregateRoot(
     override fun hashCode(): Int {
         return uuid.hashCode()
     }
+
+    fun registeredEvents(): Collection<Any> = super.domainEvents()
 }

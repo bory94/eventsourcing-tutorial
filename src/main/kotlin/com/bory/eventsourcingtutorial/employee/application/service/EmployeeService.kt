@@ -1,9 +1,8 @@
 package com.bory.eventsourcingtutorial.employee.application.service
 
-import com.bory.eventsourcingtutorial.core.application.dto.EventSourceResponse
+import com.bory.eventsourcingtutorial.core.application.service.AbstractDomainService
 import com.bory.eventsourcingtutorial.core.domain.EventSourceService
 import com.bory.eventsourcingtutorial.employee.application.command.*
-import com.bory.eventsourcingtutorial.employee.application.event.*
 import com.bory.eventsourcingtutorial.employee.domain.Employee
 import com.bory.eventsourcingtutorial.employee.domain.exception.NoSuchEmployeeException
 import com.bory.eventsourcingtutorial.employee.infrastructure.persistence.EmployeeRepository
@@ -13,90 +12,55 @@ import java.util.*
 @Service
 class EmployeeService(
     private val employeeRepository: EmployeeRepository,
-    private val eventSourceService: EventSourceService
-) {
-    fun create(command: CreateEmployeeCommand): EventSourceResponse {
-        val created = employeeRepository.save(Employee(UUID.randomUUID().toString(), command))
+    eventSourceService: EventSourceService
+) : AbstractDomainService(eventSourceService) {
+    fun create(command: CreateEmployeeCommand): Employee =
+        employeeRepository.save(Employee(UUID.randomUUID().toString(), command))
+            .apply { storeEvent(registeredEvents()) }
 
-        return eventSourceService.storeAndGetResponse(
-            created.uuid,
-            EmployeeCreatedEvent(created)
-        )
-    }
 
-    fun update(uuid: String, command: UpdateEmployeeCommand): EventSourceResponse {
+    fun update(uuid: String, command: UpdateEmployeeCommand): Employee {
         val employee = employeeRepository.findByUuidAndDeletedIsFalse(uuid)
             ?: throw NoSuchEmployeeException("Employee uuid[$uuid] not found")
 
         employee.updateWith(Employee(uuid, command))
 
-        return employeeRepository.save(employee)
-            .let { saved ->
-                eventSourceService.storeAndGetResponse(saved.uuid, EmployeeUpdatedEvent(saved))
-            }
+        return employeeRepository.save(employee).apply { storeEvent(registeredEvents()) }
     }
 
-    fun delete(command: DeleteEmployeeCommand): EventSourceResponse {
+    fun delete(command: DeleteEmployeeCommand): Employee {
         val employee = employeeRepository.findByUuidAndDeletedIsFalse(command.employeeUuid)
             ?: throw NoSuchEmployeeException("Employee uuid[${command.employeeUuid}] not found")
 
         employee.delete()
 
-        return employeeRepository.save(employee)
-            .let {
-                eventSourceService.storeAndGetResponse(
-                    command.employeeUuid, EmployeeDeletedEvent(command.employeeUuid)
-                )
-            }
+        return employeeRepository.save(employee).apply { storeEvent(registeredEvents()) }
     }
 
-    fun moveToDepartment(command: RequestMoveEmployeeToDepartmentCommand): EventSourceResponse {
+    fun moveToDepartment(command: RequestMoveEmployeeToDepartmentCommand): Employee {
         val employee = employeeRepository.findByUuidAndDeletedIsFalse(command.employeeUuid)
             ?: throw NoSuchEmployeeException("Employee uuid[${command.employeeUuid}] not found")
 
-        val fromDepartmentUuid = employee.departmentUuid
         employee.moveToDepartment(command.toDepartmentUuid)
 
-        return employeeRepository.save(employee)
-            .let {
-                eventSourceService.storeAndGetResponse(
-                    command.employeeUuid,
-                    EmployeeMoveRequestedToDepartmentEvent(
-                        command.employeeUuid,
-                        fromDepartmentUuid,
-                        command.toDepartmentUuid
-                    )
-                )
-            }
+        return employeeRepository.save(employee).apply { storeEvent(registeredEvents()) }
     }
 
-    fun assignToProject(command: RequestAssignEmployeeToProjectCommand): EventSourceResponse {
+    fun assignToProject(command: RequestAssignEmployeeToProjectCommand): Employee {
         val employee = employeeRepository.findByUuidAndDeletedIsFalse(command.employeeUuid)
             ?: throw NoSuchEmployeeException("Employee uuid[${command.employeeUuid}] not found")
 
         employee.requestAssignProject(command.projectUuid)
 
-        return employeeRepository.save(employee)
-            .let {
-                eventSourceService.storeAndGetResponse(
-                    employee.uuid,
-                    EmployeeAssignRequestedToProjectEvent(employee.uuid, command.projectUuid)
-                )
-            }
+        return employeeRepository.save(employee).apply { storeEvent(registeredEvents()) }
     }
 
-    fun unassignFromProject(command: RequestUnassignEmployeeFromProjectCommand): EventSourceResponse {
+    fun unassignFromProject(command: RequestUnassignEmployeeFromProjectCommand): Employee {
         val employee = employeeRepository.findByUuidAndDeletedIsFalse(command.employeeUuid)
             ?: throw NoSuchEmployeeException("Employee uuid[${command.employeeUuid}] not found")
 
         employee.requestUnassignProject(command.projectUuid)
 
-        return employeeRepository.save(employee)
-            .let {
-                eventSourceService.storeAndGetResponse(
-                    employee.uuid,
-                    EmployeeUnassignRequestedFromProjectEvent(employee.uuid, command.projectUuid)
-                )
-            }
+        return employeeRepository.save(employee).apply { storeEvent(registeredEvents()) }
     }
 }

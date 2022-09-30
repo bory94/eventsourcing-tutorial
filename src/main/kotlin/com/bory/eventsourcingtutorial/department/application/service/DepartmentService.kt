@@ -1,5 +1,7 @@
 package com.bory.eventsourcingtutorial.department.application.service
 
+import com.bory.eventsourcingtutorial.core.application.service.AbstractDomainService
+import com.bory.eventsourcingtutorial.core.domain.EventSourceService
 import com.bory.eventsourcingtutorial.department.application.command.CreateDepartmentCommand
 import com.bory.eventsourcingtutorial.department.application.command.DeleteDepartmentCommand
 import com.bory.eventsourcingtutorial.department.application.command.UpdateDepartmentCommand
@@ -13,12 +15,12 @@ import java.util.*
 @Service
 @Transactional
 class DepartmentService(
-    private val departmentRepository: DepartmentRepository
-) {
+    private val departmentRepository: DepartmentRepository,
+    eventSourceService: EventSourceService
+) : AbstractDomainService(eventSourceService) {
     fun create(command: CreateDepartmentCommand): Department =
-        departmentRepository.save(
-            Department(UUID.randomUUID().toString(), command)
-        )
+        departmentRepository.save(Department(UUID.randomUUID().toString(), command))
+            .apply { storeEvent(registeredEvents()) }
 
 
     fun update(uuid: String, command: UpdateDepartmentCommand): Department {
@@ -27,7 +29,7 @@ class DepartmentService(
 
         department.updateWith(Department(uuid, command))
 
-        return departmentRepository.save(department)
+        return departmentRepository.save(department).apply { storeEvent(registeredEvents()) }
     }
 
     fun delete(command: DeleteDepartmentCommand): Department {
@@ -36,6 +38,6 @@ class DepartmentService(
 
         department.delete()
 
-        return departmentRepository.save(department)
+        return departmentRepository.save(department).apply { storeEvent(registeredEvents()) }
     }
 }

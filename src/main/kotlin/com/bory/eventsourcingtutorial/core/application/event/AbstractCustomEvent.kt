@@ -5,5 +5,6 @@ import java.util.*
 
 open class AbstractCustomEvent(
     open val uuid: String = UUID.randomUUID().toString(),
+    val aggregateUuid: String,
     open val emittedAt: Instant = Instant.now()
 )

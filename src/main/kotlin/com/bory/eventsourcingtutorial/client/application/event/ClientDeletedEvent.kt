@@ -4,4 +4,4 @@ import com.bory.eventsourcingtutorial.core.application.event.AbstractCustomEvent
 
 data class ClientDeletedEvent(
     val clientUuid: String
-) : AbstractCustomEvent()
+) : AbstractCustomEvent(aggregateUuid = clientUuid)
