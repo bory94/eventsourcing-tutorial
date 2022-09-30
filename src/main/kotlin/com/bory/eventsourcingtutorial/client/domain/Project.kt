@@ -17,7 +17,7 @@ data class Project(
     var updatedAt: Instant = Instant.now(),
     val clientUuid: String,
 
-    @MappedCollection(idColumn = "uuid", keyColumn = "project_uuid")
+    @MappedCollection(idColumn = "project_uuid", keyColumn = "uuid")
     var projectAssignees: List<ProjectAssignee> = mutableListOf()
 ) {
     constructor(clientUuid: String, projectDto: ProjectDto) : this(

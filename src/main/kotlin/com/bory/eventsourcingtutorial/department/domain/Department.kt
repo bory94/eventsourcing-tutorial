@@ -4,9 +4,7 @@ import com.bory.eventsourcingtutorial.core.domain.AbstractPersistableAggregateRo
 import com.bory.eventsourcingtutorial.department.application.command.CreateDepartmentCommand
 import com.bory.eventsourcingtutorial.department.application.command.UpdateDepartmentCommand
 import com.bory.eventsourcingtutorial.department.application.dto.DepartmentDto
-import com.bory.eventsourcingtutorial.department.application.event.DepartmentCreatedEvent
-import com.bory.eventsourcingtutorial.department.application.event.DepartmentDeletedEvent
-import com.bory.eventsourcingtutorial.department.application.event.DepartmentUpdatedEvent
+import com.bory.eventsourcingtutorial.department.application.event.*
 import org.springframework.data.annotation.PersistenceCreator
 import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
@@ -23,11 +21,15 @@ class Department(
     createdAt: Instant? = null,
     updatedAt: Instant? = null,
 
-    @MappedCollection(idColumn = "uuid", keyColumn = "employee_uuid")
+    @MappedCollection(idColumn = "department_uuid", keyColumn = "uuid")
     var departmentTeamMembers: List<DepartmentTeamMember> = mutableListOf(),
 
     persisted: Boolean = false
 ) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt, persisted) {
+    companion object {
+        private const val MAXIMUM_TEAM_SIZE = 8
+    }
+
     @PersistenceCreator
     constructor(
         uuid: String,
@@ -46,9 +48,9 @@ class Department(
 
     constructor(uuid: String, command: CreateDepartmentCommand) : this(
         uuid = uuid,
-        name = command.departmentDto.name,
-        description = command.departmentDto.name,
-        deleted = command.departmentDto.deleted
+        name = command.department.name,
+        description = command.department.name,
+        deleted = command.department.deleted
     ) {
         registerEvent(DepartmentCreatedEvent(this))
     }
@@ -85,4 +87,23 @@ class Department(
         updatedAt = updatedAt!!,
         departmentTeamMembers = departmentTeamMembers.map(DepartmentTeamMember::toDto)
     )
+
+    fun tryAcceptTeamMember(teamMember: DepartmentTeamMember) = this.apply {
+        if (departmentTeamMembers.size >= MAXIMUM_TEAM_SIZE) {
+            throw IllegalStateException("Team size is full. Cannot accept team members more.")
+        }
+
+        departmentTeamMembers += teamMember
+
+        registerEvent(EmployeeMoveAcceptedEvent(teamMember.employeeUuid, this.uuid))
+    }
+
+    fun tryReleaseTeamMember(employeeUuid: String) = this.apply {
+        if (departmentTeamMembers.size <= 1) {
+            throw IllegalStateException("Team size is too small. Cannot release team members more.")
+        }
+        departmentTeamMembers = departmentTeamMembers.filter { it.employeeUuid != employeeUuid }
+
+        registerEvent(EmployeeReleasedEvent(employeeUuid, this.uuid))
+    }
 }

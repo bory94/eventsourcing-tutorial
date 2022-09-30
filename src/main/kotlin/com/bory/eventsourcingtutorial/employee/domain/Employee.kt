@@ -58,13 +58,20 @@ class Employee(
 
     constructor(uuid: String, command: CreateEmployeeCommand) : this(
         uuid,
-        command.employeeDto.name,
-        command.employeeDto.age,
-        command.employeeDto.salary,
-        command.employeeDto.position,
-        command.employeeDto.departmentUuid,
+        command.employee.name,
+        command.employee.age,
+        command.employee.salary,
+        command.employee.position,
+        command.employee.departmentUuid,
     ) {
         registerEvent(EmployeeCreatedEvent(this))
+        registerEvent(
+            EmployeeMoveRequestedToDepartmentEvent(
+                uuid,
+                null,
+                command.employee.departmentUuid
+            )
+        )
     }
 
     constructor(uuid: String, command: UpdateEmployeeCommand) : this(
@@ -138,4 +145,14 @@ class Employee(
         createdAt = createdAt!!,
         updatedAt = updatedAt!!,
     )
+
+    fun moveToDepartmentFailed(fromDepartmentUuid: String) = this.apply {
+        this.departmentUuid = fromDepartmentUuid
+        this.departmentMoveStatus = DepartmentMoveStatus.MOVING_FAILED
+    }
+
+    fun movetoDepartmentAccepted(acceptedDepartmentUuid: String) = this.apply {
+        this.departmentUuid = acceptedDepartmentUuid
+        this.departmentMoveStatus = DepartmentMoveStatus.MOVING_ACCEPTED
+    }
 }

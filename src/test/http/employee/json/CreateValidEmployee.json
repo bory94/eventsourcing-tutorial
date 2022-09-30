@@ -1,0 +1,9 @@
+{
+  "employee": {
+    "name": "John Corner",
+    "age": "19",
+    "salary": "2800",
+    "position": "INTERN",
+    "departmentUuid": "5785caff-c02b-420f-b3ac-b3c781a9eea8"
+  }
+}

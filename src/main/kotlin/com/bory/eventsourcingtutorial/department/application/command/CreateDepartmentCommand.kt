@@ -5,5 +5,5 @@ import javax.validation.Valid
 
 data class CreateDepartmentCommand(
     @field:Valid
-    val departmentDto: DepartmentDto
+    val department: DepartmentDto
 )

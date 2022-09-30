@@ -5,5 +5,5 @@ import javax.validation.Valid
 
 data class CreateEmployeeCommand(
     @field:Valid
-    val employeeDto: EmployeeDto
+    val employee: EmployeeDto
 )
