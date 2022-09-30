@@ -22,7 +22,6 @@ class ClientService(
         Client(UUID.randomUUID().toString(), command)
     ).apply { storeEvent(registeredEvents()) }
 
-
     fun update(uuid: String, command: UpdateClientCommand): Client {
         val loadedClient = clientRepository.findByUuidAndDeletedIsFalse(command.client.uuid!!)
             ?: throw NoSuchClientException("No Such Client[${command.client.uuid}] found, or else deleted uuid inserted")
