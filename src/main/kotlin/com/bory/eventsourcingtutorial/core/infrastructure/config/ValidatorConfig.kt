@@ -12,9 +12,11 @@ class ValidatorConfig {
     fun customValidator(): Validator = Validation.buildDefaultValidatorFactory().validator
 }
 
-fun Validator.validateAndThrow(
-    value: Any,
+fun <T> Validator.validateAndThrow(
+    value: T,
     vararg groups: Class<*>
-) = this.validate(value, *groups).let { violations ->
+): T = this.validate(value, *groups).let { violations ->
     if (violations.isNotEmpty()) throw ConstraintViolationException(violations)
+
+    return value
 }

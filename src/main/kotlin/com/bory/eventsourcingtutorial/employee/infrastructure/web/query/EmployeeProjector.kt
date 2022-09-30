@@ -17,9 +17,9 @@ class EmployeeProjector(
     override fun eventCases(): Map<Class<out Any>, (Employee, EventSource) -> Employee> = mapOf(
         EmployeeUpdatedEvent::class.java to this::updateEmployee,
         EmployeeDeletedEvent::class.java to { employee, _ -> employee.delete() },
-        EmployeeAssignedToProjectEvent::class.java to this::assignToProject,
-        EmployeeUnassignedFromProjectEvent::class.java to this::unassignFromProject,
-        EmployeeMovedToDepartmentEvent::class.java to this::moveToDepartment,
+        EmployeeAssignRequestedToProjectEvent::class.java to this::assignToProject,
+        EmployeeUnassignRequestedFromProjectEvent::class.java to this::unassignFromProject,
+        EmployeeMoveRequestedToDepartmentEvent::class.java to this::moveToDepartment,
     )
 
     fun updateEmployee(employee: Employee, eventSource: EventSource) = employee.apply {
@@ -31,25 +31,25 @@ class EmployeeProjector(
     fun assignToProject(employee: Employee, eventSource: EventSource) = employee.apply {
         val projectUuid = objectMapper.readValue(
             eventSource.payload!!,
-            EmployeeAssignedToProjectEvent::class.java
+            EmployeeAssignRequestedToProjectEvent::class.java
         ).projectUuid
-        assignProject(projectUuid)
+        requestAssignProject(projectUuid)
     }
 
     fun unassignFromProject(employee: Employee, eventSource: EventSource) = employee.apply {
         val projectUuid = objectMapper.readValue(
             eventSource.payload!!,
-            EmployeeUnassignedFromProjectEvent::class.java
+            EmployeeUnassignRequestedFromProjectEvent::class.java
         ).projectUuid
 
-        unassignProject(projectUuid)
+        requestUnassignProject(projectUuid)
     }
 
     fun moveToDepartment(employee: Employee, eventSource: EventSource) = employee.apply {
         val departmentUuid = objectMapper.readValue(
             eventSource.payload!!,
-            EmployeeMovedToDepartmentEvent::class.java
-        ).departmentUuid
+            EmployeeMoveRequestedToDepartmentEvent::class.java
+        ).toDepartmentUuid
 
         moveToDepartment(departmentUuid)
     }

@@ -4,6 +4,9 @@ import com.bory.eventsourcingtutorial.core.domain.AbstractPersistableAggregateRo
 import com.bory.eventsourcingtutorial.department.application.command.CreateDepartmentCommand
 import com.bory.eventsourcingtutorial.department.application.command.UpdateDepartmentCommand
 import com.bory.eventsourcingtutorial.department.application.dto.DepartmentDto
+import com.bory.eventsourcingtutorial.department.application.event.DepartmentCreatedEvent
+import com.bory.eventsourcingtutorial.department.application.event.DepartmentDeletedEvent
+import com.bory.eventsourcingtutorial.department.application.event.DepartmentUpdatedEvent
 import org.springframework.data.annotation.PersistenceCreator
 import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
@@ -46,7 +49,9 @@ class Department(
         name = command.departmentDto.name,
         description = command.departmentDto.name,
         deleted = command.departmentDto.deleted
-    )
+    ) {
+        registerEvent(DepartmentCreatedEvent(this))
+    }
 
     constructor(uuid: String, command: UpdateDepartmentCommand) : this(
         uuid = uuid,
@@ -60,14 +65,14 @@ class Department(
         description = updating.description
         deleted = updating.deleted
         updatedAt = Instant.now()
+
+        registerEvent(DepartmentUpdatedEvent(this))
     }
 
     fun delete() = this.apply {
         deleted = true
-    }
 
-    fun addTeamMember(employeeUuid: String) = this.apply {
-        departmentTeamMembers += DepartmentTeamMember(employeeUuid = employeeUuid)
+        registerEvent(DepartmentDeletedEvent(this.uuid))
     }
 
     fun toDto() = DepartmentDto(

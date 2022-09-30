@@ -34,8 +34,6 @@ class EventSource(
         if (event != null) {
             type = event.javaClass.canonicalName
             payload = customObjectMapper.writeValueAsString(event)
-
-            if (!persisted) registerEvent(event)
         }
     }
 

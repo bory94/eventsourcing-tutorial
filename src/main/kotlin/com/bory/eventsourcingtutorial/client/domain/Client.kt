@@ -3,6 +3,7 @@ package com.bory.eventsourcingtutorial.client.domain
 import com.bory.eventsourcingtutorial.client.application.command.CreateClientCommand
 import com.bory.eventsourcingtutorial.client.application.command.UpdateClientCommand
 import com.bory.eventsourcingtutorial.client.application.dto.ClientDto
+import com.bory.eventsourcingtutorial.client.application.event.*
 import com.bory.eventsourcingtutorial.client.domain.exception.NoSuchProjectException
 import com.bory.eventsourcingtutorial.core.domain.AbstractPersistableAggregateRoot
 import org.springframework.data.annotation.PersistenceCreator
@@ -55,7 +56,9 @@ class Client(
                 clientUuid = uuid
             )
         }
-    )
+    ) {
+        registerEvent(ClientCreatedEvent(this))
+    }
 
     constructor(uuid: String, command: UpdateClientCommand) : this(
         uuid = uuid,
@@ -64,43 +67,39 @@ class Client(
         address = command.client.address
     )
 
-    fun updateWith(updatingClient: Client) = this.apply {
-        name = updatingClient.name
-        address = updatingClient.address
-        phoneNumber = updatingClient.phoneNumber
+    fun updateWith(updating: Client) = this.apply {
+        name = updating.name
+        address = updating.address
+        phoneNumber = updating.phoneNumber
+
+        registerEvent(ClientUpdatedEvent(this))
     }
 
     fun delete() = this.apply {
         this.deleted = true
+
+        registerEvent(ClientDeletedEvent(this.uuid))
     }
 
     fun addProject(projects: List<Project>) = this.apply {
         this.projects += projects
+
+        registerEvent(ProjectsAddedEvent(this.uuid, projects))
     }
 
     fun updateProject(updatingProject: Project) = this.apply {
         val project = projects.firstOrNull { it.uuid == updatingProject.uuid }
             ?: throw NoSuchProjectException("Project uuid[${updatingProject.uuid}] not found.")
         project.updateWith(updatingProject)
+
+        registerEvent(ProjectUpdatedEvent(this.uuid, updatingProject))
     }
 
-    fun removeProject(projectUuid: String) = this.apply {
+    fun deleteProject(projectUuid: String) = this.apply {
         projects -= projects.find { it.uuid == projectUuid }
             ?: throw NoSuchProjectException("Project uuid[$projectUuid] not found.")
-    }
 
-    fun assignProjectTeamMember(projectUuid: String, employeeUuid: String) = this.apply {
-        val project = projects.find { it.uuid == projectUuid }
-            ?: throw NoSuchProjectException("Project uuid[$projectUuid] not found.")
-
-        project.assignTeamMember(employeeUuid)
-    }
-
-    fun unassignProjectTeamMember(projectUuid: String, employeeUuid: String) = this.apply {
-        val project = projects.find { it.uuid == projectUuid }
-            ?: throw NoSuchProjectException("Project uuid[$projectUuid] not found.")
-
-        project.unassignTeamMember(employeeUuid)
+        registerEvent(ProjectDeletedEvent(this.uuid, projectUuid))
     }
 
     fun toDto() = ClientDto(

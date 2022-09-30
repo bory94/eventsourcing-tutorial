@@ -19,9 +19,7 @@ class ClientProjector(
         ClientDeletedEvent::class.java to { client, _ -> client.delete() },
         ProjectsAddedEvent::class.java to this::addProjects,
         ProjectUpdatedEvent::class.java to this::updateProject,
-        ProjectDeletedEvent::class.java to this::deleteProject,
-        ProjectTeamMemberAssignedEvent::class.java to this::assignTeamMember,
-        ProjectTeamMemberUnassignedEvent::class.java to this::unassignTeamMember
+        ProjectDeletedEvent::class.java to this::deleteProject
     )
 
     private fun updateClient(client: Client, eventSource: EventSource) = client.apply {
@@ -52,24 +50,6 @@ class ClientProjector(
                 ProjectDeletedEvent::class.java
             ).projectUuid
 
-        removeProject(deletingProjectUuid)
-    }
-
-    private fun assignTeamMember(client: Client, eventSource: EventSource) = client.apply {
-        val event = objectMapper.readValue(
-            eventSource.payload!!,
-            ProjectTeamMemberAssignedEvent::class.java
-        )
-
-        assignProjectTeamMember(event.projectUuid, event.teamMemberUuid)
-    }
-
-    private fun unassignTeamMember(client: Client, eventSource: EventSource) = client.apply {
-        val event = objectMapper.readValue(
-            eventSource.payload!!,
-            ProjectTeamMemberUnassignedEvent::class.java
-        )
-
-        unassignProjectTeamMember(event.projectUuid, event.teamMemberUuid)
+        deleteProject(deletingProjectUuid)
     }
 }

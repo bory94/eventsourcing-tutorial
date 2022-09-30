@@ -1,6 +1,6 @@
 package com.bory.eventsourcingtutorial.employee.application.event
 
-data class EmployeeMovedToDepartmentEvent(
+data class EmployeeUnassignRequestedFromProjectEvent(
     val employeeUuid: String,
-    val departmentUuid: String
+    val projectUuid: String
 )

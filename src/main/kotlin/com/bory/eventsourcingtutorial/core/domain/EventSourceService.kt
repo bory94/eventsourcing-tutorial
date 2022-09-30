@@ -13,5 +13,5 @@ class EventSourceService(
     fun storeAndGetResponse(aggregateId: String, event: Any) =
         EventSource(aggregateId = aggregateId, event = event)
             .let(eventSourceRepository::save)
-            .let { EventSourceResponse(it).acceptedResponse() }
+            .let(::EventSourceResponse)
 }

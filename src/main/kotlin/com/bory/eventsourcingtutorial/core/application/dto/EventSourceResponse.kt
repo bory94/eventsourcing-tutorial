@@ -1,7 +1,6 @@
 package com.bory.eventsourcingtutorial.core.application.dto
 
 import com.bory.eventsourcingtutorial.core.domain.EventSource
-import org.springframework.http.ResponseEntity
 import java.time.Instant
 
 data class EventSourceResponse(
@@ -18,6 +17,4 @@ data class EventSourceResponse(
         eventSource.aggregateId,
         eventSource.createdAt
     )
-
-    fun acceptedResponse() = ResponseEntity.accepted().body(this)
 }

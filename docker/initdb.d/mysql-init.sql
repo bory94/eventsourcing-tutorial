@@ -68,17 +68,18 @@ create index idx_department_updated_at on department (updated_at);
 
 CREATE TABLE employee
 (
-    uuid            varchar(36) not null,
-    name            varchar(36) not null,
-    age             int         not null default 1,
-    salary          int         not null default 1,
-    position        varchar(20) not null,
-    deleted         bit         not null default false,
-    version         int         not null default 1,
-    created_at      timestamp   not null default current_timestamp,
-    updated_at      timestamp   not null default current_timestamp,
+    uuid                   varchar(36) not null,
+    name                   varchar(36) not null,
+    age                    int         not null default 1,
+    salary                 int         not null default 1,
+    position               varchar(20) not null,
+    deleted                bit         not null default false,
+    version                int         not null default 1,
+    created_at             timestamp   not null default current_timestamp,
+    updated_at             timestamp   not null default current_timestamp,
 
-    department_uuid varchar(36) not null,
+    department_uuid        varchar(36) not null,
+    department_move_status varchar(36) not null default 'MOVING_ACCEPTED',
 
     primary key (uuid),
     foreign key (department_uuid) references department (uuid)
@@ -95,6 +96,7 @@ CREATE TABLE employee_project
     employee_uuid varchar(36) not null,
     client_uuid   varchar(36) not null,
     project_uuid  varchar(36) not null,
+    status        varchar(36) not null default 'ASSIGNING_ACCEPTED',
     created_at    timestamp   not null default current_timestamp,
     primary key (uuid),
     foreign key (employee_uuid) references employee (uuid),

@@ -1,80 +1,66 @@
 package com.bory.eventsourcingtutorial.employee.infrastructure.web.command
 
-import com.bory.eventsourcingtutorial.core.domain.EventSourceService
 import com.bory.eventsourcingtutorial.core.infrastructure.annotations.CommandController
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
 import com.bory.eventsourcingtutorial.employee.application.command.*
-import com.bory.eventsourcingtutorial.employee.application.event.*
-import com.bory.eventsourcingtutorial.employee.domain.Employee
+import com.bory.eventsourcingtutorial.employee.application.service.EmployeeService
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.util.*
 import javax.validation.Valid
 import javax.validation.Validator
 
 @CommandController
 @RequestMapping("/api/v1/employees")
 class EmployeeCommandController(
-    private val eventSourceService: EventSourceService,
+    private val employeeService: EmployeeService,
     private val customValidator: Validator
 ) {
     @PostMapping
     fun create(@RequestBody @Valid command: CreateEmployeeCommand) =
-        Employee(UUID.randomUUID().toString(), command)
-            .let { eventSourceService.storeAndGetResponse(it.uuid, EmployeeCreatedEvent(it)) }
+        ResponseEntity.accepted().body(
+            employeeService.create(command)
+        )
 
     @PutMapping("/{uuid}")
     fun update(
         @PathVariable("uuid") uuid: String,
         @RequestBody @Valid command: UpdateEmployeeCommand
-    ) = Employee(uuid, command)
-        .let {
-            eventSourceService.storeAndGetResponse(it.uuid, EmployeeUpdatedEvent(it))
-        }
+    ) =
+        ResponseEntity.accepted().body(
+            employeeService.update(uuid, command)
+        )
 
     @DeleteMapping("/{uuid}")
     fun delete(@PathVariable("uuid") uuid: String) =
         DeleteEmployeeCommand(uuid)
             .also(customValidator::validateAndThrow)
-            .let {
-                eventSourceService.storeAndGetResponse(uuid, EmployeeDeletedEvent(uuid))
-            }
-
-    @PostMapping("/{employeeUuid}/project/{projectUuid}")
-    fun assignToProject(
-        @PathVariable("employeeUuid") employeeUuid: String,
-        @PathVariable("projectUuid") projectUuid: String
-    ) = AssignEmployeeToProjectCommand(employeeUuid, projectUuid)
-        .also(customValidator::validateAndThrow)
-        .let {
-            eventSourceService.storeAndGetResponse(
-                employeeUuid,
-                EmployeeAssignedToProjectEvent(employeeUuid, projectUuid)
-            )
-        }
-
-    @DeleteMapping("/{employeeUuid}/project/{projectUuid}")
-    fun unassignFromProject(
-        @PathVariable("employeeUuid") employeeUuid: String,
-        @PathVariable("projectUuid") projectUuid: String
-    ) = UnassignEmployeeFromProjectCommand(employeeUuid, projectUuid)
-        .also(customValidator::validateAndThrow)
-        .let {
-            eventSourceService.storeAndGetResponse(
-                employeeUuid,
-                EmployeeUnassignedFromProjectEvent(employeeUuid, projectUuid)
-            )
-        }
+            .let(employeeService::delete)
+            .let(ResponseEntity.accepted()::body)
 
     @PutMapping("/move/{employeeUuid}/department/{departmentUuid}")
     fun moveToDepartment(
         @PathVariable("employeeUuid") employeeUuid: String,
         @PathVariable("departmentUuid") departmentUuid: String
-    ) = MoveEmployeeToDepartmentCommand(employeeUuid, departmentUuid)
+    ) = RequestMoveEmployeeToDepartmentCommand(employeeUuid, departmentUuid)
         .also(customValidator::validateAndThrow)
-        .let {
-            eventSourceService.storeAndGetResponse(
-                employeeUuid,
-                EmployeeMovedToDepartmentEvent(employeeUuid, departmentUuid)
-            )
-        }
+        .let(employeeService::moveToDepartment)
+        .let(ResponseEntity.accepted()::body)
+
+    @PostMapping("/{employeeUuid}/project/{projectUuid}")
+    fun assignToProject(
+        @PathVariable("employeeUuid") employeeUuid: String,
+        @PathVariable("projectUuid") projectUuid: String
+    ) = RequestAssignEmployeeToProjectCommand(employeeUuid, projectUuid)
+        .also(customValidator::validateAndThrow)
+        .let(employeeService::assignToProject)
+        .let(ResponseEntity.accepted()::body)
+
+    @DeleteMapping("/{employeeUuid}/project/{projectUuid}")
+    fun unassignFromProject(
+        @PathVariable("employeeUuid") employeeUuid: String,
+        @PathVariable("projectUuid") projectUuid: String
+    ) = RequestUnassignEmployeeFromProjectCommand(employeeUuid, projectUuid)
+        .also(customValidator::validateAndThrow)
+        .let(employeeService::unassignFromProject)
+        .let(ResponseEntity.accepted()::body)
 }

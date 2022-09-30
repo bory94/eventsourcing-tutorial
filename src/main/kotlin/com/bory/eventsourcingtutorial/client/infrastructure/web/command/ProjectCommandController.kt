@@ -3,54 +3,47 @@ package com.bory.eventsourcingtutorial.client.infrastructure.web.command
 import com.bory.eventsourcingtutorial.client.application.command.AddProjectsCommand
 import com.bory.eventsourcingtutorial.client.application.command.DeleteProjectCommand
 import com.bory.eventsourcingtutorial.client.application.command.UpdateProjectCommand
-import com.bory.eventsourcingtutorial.client.application.event.ProjectDeletedEvent
-import com.bory.eventsourcingtutorial.client.application.event.ProjectUpdatedEvent
-import com.bory.eventsourcingtutorial.client.application.event.ProjectsAddedEvent
-import com.bory.eventsourcingtutorial.client.domain.Project
-import com.bory.eventsourcingtutorial.core.domain.EventSourceService
+import com.bory.eventsourcingtutorial.client.application.service.ProjectService
 import com.bory.eventsourcingtutorial.core.infrastructure.annotations.CommandController
 import com.bory.eventsourcingtutorial.core.infrastructure.config.validateAndThrow
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 import javax.validation.Validator
 
 @CommandController
-@RequestMapping("/api/v1/clients/{uuid}/projects")
+@RequestMapping("/api/v1/clients/{clientUuid}/projects")
 class ProjectCommandController(
-    private val eventSourceService: EventSourceService,
+    private val projectService: ProjectService,
     private val customValidator: Validator
 ) {
     @PostMapping
     fun addProjects(
-        @PathVariable("uuid") uuid: String,
-        @Valid @RequestBody addProjectsCommand: AddProjectsCommand
+        @PathVariable("clientUuid") clientUuid: String,
+        @Valid @RequestBody command: AddProjectsCommand
     ) =
-        addProjectsCommand.projects.map { Project(uuid, it) }
-            .let {
-                eventSourceService.storeAndGetResponse(uuid, ProjectsAddedEvent(uuid, it))
-            }
+        ResponseEntity.accepted().body(
+            projectService.addProjectsTo(clientUuid, command)
+        )
 
     @PutMapping
     fun updateProject(
-        @PathVariable("uuid") uuid: String,
-        @Valid @RequestBody updateProjectCommand: UpdateProjectCommand
+        @PathVariable("clientUuid") clientUuid: String,
+        @Valid @RequestBody command: UpdateProjectCommand
     ) =
-        Project(uuid, updateProjectCommand.project)
-            .let {
-                eventSourceService.storeAndGetResponse(uuid, ProjectUpdatedEvent(uuid, it))
-            }
+        ResponseEntity.accepted().body(
+            projectService.update(clientUuid, command)
+        )
 
     @DeleteMapping("/{projectUuid}")
     fun deleteProject(
-        @PathVariable("uuid") clientUuid: String,
+        @PathVariable("clientUuid") clientUuid: String,
         @PathVariable("projectUuid") projectUuid: String
     ) =
         DeleteProjectCommand(clientUuid, projectUuid)
             .also(customValidator::validateAndThrow)
             .let {
-                eventSourceService.storeAndGetResponse(
-                    clientUuid, ProjectDeletedEvent(clientUuid, projectUuid)
-                )
+                projectService.delete(clientUuid, it)
             }
 
 }

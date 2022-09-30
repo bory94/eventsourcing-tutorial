@@ -1,11 +1,13 @@
 package com.bory.eventsourcingtutorial.employee.domain
 
-import com.bory.eventsourcingtutorial.client.application.event.ProjectTeamMemberAssignedEvent
-import com.bory.eventsourcingtutorial.client.application.event.ProjectTeamMemberUnassignedEvent
+import com.bory.eventsourcingtutorial.client.domain.exception.NoSuchProjectException
 import com.bory.eventsourcingtutorial.core.domain.AbstractPersistableAggregateRoot
 import com.bory.eventsourcingtutorial.employee.application.command.CreateEmployeeCommand
 import com.bory.eventsourcingtutorial.employee.application.command.UpdateEmployeeCommand
 import com.bory.eventsourcingtutorial.employee.application.dto.EmployeeDto
+import com.bory.eventsourcingtutorial.employee.application.enum.DepartmentMoveStatus
+import com.bory.eventsourcingtutorial.employee.application.enum.ProjectAssignStatus
+import com.bory.eventsourcingtutorial.employee.application.event.*
 import org.springframework.data.annotation.PersistenceCreator
 import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
@@ -20,6 +22,7 @@ class Employee(
     var salary: Int,
     var position: String,
     var departmentUuid: String,
+    var departmentMoveStatus: DepartmentMoveStatus = DepartmentMoveStatus.MOVING_ACCEPTED,
     var deleted: Boolean = false,
     version: Int = 1,
     createdAt: Instant? = null,
@@ -35,7 +38,7 @@ class Employee(
         uuid: String,
 
         name: String, age: Int, salary: Int, position: String,
-        departmentUuid: String, deleted: Boolean,
+        departmentUuid: String, departmentMoveStatus: DepartmentMoveStatus, deleted: Boolean,
 
         version: Int,
         createdAt: Instant,
@@ -43,7 +46,7 @@ class Employee(
     ) : this(
         uuid,
 
-        name, age, salary, position, departmentUuid, deleted,
+        name, age, salary, position, departmentUuid, departmentMoveStatus, deleted,
 
         version,
         createdAt, updatedAt,
@@ -59,7 +62,9 @@ class Employee(
         command.employeeDto.salary,
         command.employeeDto.position,
         command.employeeDto.departmentUuid,
-    )
+    ) {
+        registerEvent(EmployeeCreatedEvent(this))
+    }
 
     constructor(uuid: String, command: UpdateEmployeeCommand) : this(
         uuid,
@@ -77,24 +82,46 @@ class Employee(
         position = employee.position
         departmentUuid = employee.departmentUuid
         deleted = employee.deleted
+
+        registerEvent(EmployeeUpdatedEvent(this))
     }
 
     fun delete() = this.apply {
         deleted = true
+
+        registerEvent(EmployeeDeletedEvent(this.uuid))
     }
 
-    fun assignProject(projectUuid: String) = this.apply {
-        employeeProjects += EmployeeProject(projectUuid = projectUuid)
-        registerEvent(ProjectTeamMemberAssignedEvent(projectUuid, uuid))
+    fun requestAssignProject(projectUuid: String) = this.apply {
+        employeeProjects += EmployeeProject(
+            projectUuid = projectUuid,
+            status = ProjectAssignStatus.ASSIGNING_REQUESTED
+        )
+
+        registerEvent(EmployeeAssignRequestedToProjectEvent(this.uuid, projectUuid))
     }
 
-    fun unassignProject(projectUuid: String) = this.apply {
-        employeeProjects = employeeProjects.filter { it.projectUuid != projectUuid }
-        registerEvent(ProjectTeamMemberUnassignedEvent(projectUuid, uuid))
+    fun requestUnassignProject(projectUuid: String) = this.apply {
+        val project = employeeProjects.find { it.uuid == projectUuid }
+            ?: throw NoSuchProjectException("Project uuid[$uuid] not found.")
+
+        project.status = ProjectAssignStatus.UNASSIGNING_REQUESTED
+        
+        registerEvent(EmployeeUnassignRequestedFromProjectEvent(this.uuid, projectUuid))
     }
 
-    fun moveToDepartment(departmentUuid: String) = this.apply {
-        this.departmentUuid = departmentUuid
+    fun moveToDepartment(toDepartmentUuid: String) = this.apply {
+        val fromDepartmentUuid = this.departmentUuid
+        this.departmentUuid = toDepartmentUuid
+        this.departmentMoveStatus = DepartmentMoveStatus.MOVING_REQUESTED
+
+        registerEvent(
+            EmployeeMoveRequestedToDepartmentEvent(
+                this.uuid,
+                fromDepartmentUuid,
+                toDepartmentUuid
+            )
+        )
     }
 
     fun toDto() = EmployeeDto(
