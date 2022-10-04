@@ -14,7 +14,7 @@ data class DepartmentDto(
     val description: String,
 
     val deleted: Boolean = false,
-    val version: Int = 1,
+    val version: Int = 0,
 
     val createdAt: Instant = Instant.now(),
     val updatedAt: Instant = Instant.now(),

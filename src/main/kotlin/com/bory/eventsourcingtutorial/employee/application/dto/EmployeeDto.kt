@@ -18,7 +18,7 @@ data class EmployeeDto(
     val salary: Int,
     val position: EmployeePosition,
     val deleted: Boolean = false,
-    val version: Int = 1,
+    val version: Int = 0,
     @field:NotBlank @field:Length(min = 36, max = 36)
     val departmentUuid: String,
 

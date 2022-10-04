@@ -17,15 +17,13 @@ class Department(
     var name: String,
     var description: String,
     var deleted: Boolean = false,
-    version: Int = 1,
+    version: Int = 0,
     createdAt: Instant? = null,
     updatedAt: Instant? = null,
 
     @MappedCollection(idColumn = "department_uuid", keyColumn = "uuid")
     var departmentTeamMembers: List<DepartmentTeamMember> = mutableListOf(),
-
-    persisted: Boolean = false
-) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt, persisted) {
+) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt) {
     companion object {
         private const val MAXIMUM_TEAM_SIZE = 8
     }
@@ -42,8 +40,7 @@ class Department(
         name, description, deleted,
         version,
         createdAt, updatedAt,
-        mutableListOf(),
-        true
+        mutableListOf()
     )
 
     constructor(uuid: String, command: CreateDepartmentCommand) : this(

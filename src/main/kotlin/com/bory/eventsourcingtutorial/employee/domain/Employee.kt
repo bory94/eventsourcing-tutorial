@@ -25,15 +25,13 @@ class Employee(
     var departmentUuid: String,
     var departmentMoveStatus: DepartmentMoveStatus = DepartmentMoveStatus.MOVING_ACCEPTED,
     var deleted: Boolean = false,
-    version: Int = 1,
+    version: Int = 0,
     createdAt: Instant? = null,
     updatedAt: Instant? = null,
 
     @MappedCollection(idColumn = "uuid", keyColumn = "employee_uuid")
-    var employeeProjects: List<EmployeeProject> = mutableListOf(),
-
-    persisted: Boolean = false
-) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt, persisted) {
+    var employeeProjects: List<EmployeeProject> = mutableListOf()
+) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt) {
     @PersistenceCreator
     constructor(
         uuid: String,
@@ -52,8 +50,7 @@ class Employee(
         version,
         createdAt, updatedAt,
 
-        mutableListOf(),
-        true
+        mutableListOf()
     )
 
     constructor(uuid: String, command: CreateEmployeeCommand) : this(

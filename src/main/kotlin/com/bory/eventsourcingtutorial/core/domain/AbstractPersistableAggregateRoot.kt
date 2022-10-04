@@ -6,35 +6,23 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.annotation.Version
 import org.springframework.data.domain.AbstractAggregateRoot
-import org.springframework.data.domain.AfterDomainEventPublication
-import org.springframework.data.domain.Persistable
 import java.time.Instant
 import java.util.*
 
-@JsonIgnoreProperties(value = ["id", "new", "persisted"])
+@JsonIgnoreProperties(value = ["id", "new"])
 abstract class AbstractPersistableAggregateRoot(
     @Id
     var uuid: String = UUID.randomUUID().toString(),
     @Version
-    var version: Int = 1,
+    var version: Int = 0,
     @field:CreatedDate
     var createdAt: Instant? = null,
     @field:LastModifiedDate
     var updatedAt: Instant? = null,
-    @field:org.springframework.data.annotation.Transient
-    var persisted: Boolean = true
-) : AbstractAggregateRoot<AbstractPersistableAggregateRoot>(), Persistable<String> {
-
-    override fun getId() = uuid
-    override fun isNew() = !persisted
-
-    @AfterDomainEventPublication
-    fun setPersisted() {
-        persisted = true
-    }
+) : AbstractAggregateRoot<AbstractPersistableAggregateRoot>() {
 
     override fun toString(): String {
-        return "AbstractEventSourceAggregateRoot(uuid=$uuid, createdAt=$createdAt, persisted=$persisted)"
+        return "AbstractEventSourceAggregateRoot(uuid=$uuid, createdAt=$createdAt)"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -49,6 +37,4 @@ abstract class AbstractPersistableAggregateRoot(
     override fun hashCode(): Int {
         return uuid.hashCode()
     }
-
-    fun registeredEvents(): Collection<Any> = super.domainEvents()
 }

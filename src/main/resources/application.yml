@@ -32,7 +32,7 @@ log4jdbc:
 
 logging:
   level:
-    com.bory.dddtutorial: DEBUG
+    com.bory.eventsourcingtutorial: DEBUG
     org.springframework:
       transaction.support.TransactionSynchronizationUtils: DEBUG
       web.servlet.DispatcherServlet: DEBUG

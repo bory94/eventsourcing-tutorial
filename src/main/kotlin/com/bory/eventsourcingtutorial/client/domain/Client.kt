@@ -19,15 +19,13 @@ class Client(
     var phoneNumber: String,
     var address: String,
     var deleted: Boolean = false,
-    version: Int = 1,
+    version: Int = 0,
     createdAt: Instant? = null,
     updatedAt: Instant? = null,
 
     @MappedCollection(idColumn = "client_uuid", keyColumn = "uuid")
     var projects: List<Project> = mutableListOf(),
-
-    persisted: Boolean = false
-) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt, persisted) {
+) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt) {
 
     @PersistenceCreator
     constructor(
@@ -40,8 +38,7 @@ class Client(
         name, phoneNumber, address, deleted,
         version,
         createdAt, updatedAt,
-        mutableListOf(),
-        true
+        mutableListOf()
     )
 
     constructor(uuid: String, command: CreateClientCommand) : this(
