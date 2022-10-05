@@ -17,7 +17,7 @@ class EventSource(
     updatedAt: Instant? = null,
     @field:org.springframework.data.annotation.Transient
     val event: Any? = null
-) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt) {
+) : DomainAggregateRoot(uuid, version, createdAt, updatedAt) {
     @PersistenceCreator
     constructor(
         uuid: String,

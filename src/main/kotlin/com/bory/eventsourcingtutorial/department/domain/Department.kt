@@ -1,6 +1,6 @@
 package com.bory.eventsourcingtutorial.department.domain
 
-import com.bory.eventsourcingtutorial.core.domain.AbstractPersistableAggregateRoot
+import com.bory.eventsourcingtutorial.core.domain.DomainAggregateRoot
 import com.bory.eventsourcingtutorial.department.application.command.CreateDepartmentCommand
 import com.bory.eventsourcingtutorial.department.application.command.UpdateDepartmentCommand
 import com.bory.eventsourcingtutorial.department.application.dto.DepartmentDto
@@ -23,7 +23,7 @@ class Department(
 
     @MappedCollection(idColumn = "department_uuid", keyColumn = "uuid")
     var departmentTeamMembers: List<DepartmentTeamMember> = mutableListOf(),
-) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt) {
+) : DomainAggregateRoot(uuid, version, createdAt, updatedAt) {
     companion object {
         private const val MAXIMUM_TEAM_SIZE = 8
     }

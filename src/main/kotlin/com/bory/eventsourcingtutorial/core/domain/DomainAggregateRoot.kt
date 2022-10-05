@@ -10,7 +10,7 @@ import java.time.Instant
 import java.util.*
 
 @JsonIgnoreProperties(value = ["id", "new"])
-abstract class AbstractPersistableAggregateRoot(
+abstract class DomainAggregateRoot(
     @Id
     var uuid: String = UUID.randomUUID().toString(),
     @Version
@@ -19,7 +19,7 @@ abstract class AbstractPersistableAggregateRoot(
     var createdAt: Instant? = null,
     @field:LastModifiedDate
     var updatedAt: Instant? = null,
-) : AbstractAggregateRoot<AbstractPersistableAggregateRoot>() {
+) : AbstractAggregateRoot<DomainAggregateRoot>() {
 
     override fun toString(): String {
         return "AbstractEventSourceAggregateRoot(uuid=$uuid, createdAt=$createdAt)"
@@ -27,7 +27,7 @@ abstract class AbstractPersistableAggregateRoot(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is AbstractPersistableAggregateRoot) return false
+        if (other !is DomainAggregateRoot) return false
 
         if (uuid != other.uuid) return false
 

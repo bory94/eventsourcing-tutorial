@@ -16,7 +16,7 @@ class DepartmentTeamMemberEventListener(
     private val departmentRepository: DepartmentRepository
 ) {
     @Async
-    @EventListener(classes = [])
+    @EventListener
     fun on(event: EmployeeMoveRequestedToDepartmentEvent): Any {
         try {
             val toDepartment =

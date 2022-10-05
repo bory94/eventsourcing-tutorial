@@ -1,6 +1,6 @@
 package com.bory.eventsourcingtutorial.core.domain
 
-interface AggregateRootProjector<T : AbstractPersistableAggregateRoot> {
+interface AggregateRootProjector<T : DomainAggregateRoot> {
     fun initialLoad(eventSource: EventSource): T
     fun eventCases(): Map<Class<out Any>, (T, EventSource) -> T>
 

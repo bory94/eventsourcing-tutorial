@@ -1,7 +1,7 @@
-GET http://localhost:8080/api/v1/clients/79fd4ab1-596c-4139-bb8a-42c470310b4c
+GET http://localhost:8080/api/v1/clients/02e4cb64-6379-4e3d-a96e-1331bd3e0760
 Accept: application/json
 
 ###
 
-GET http://localhost:8080/api/v1/clients/snapshot/79fd4ab1-596c-4139-bb8a-42c470310b4c
+GET http://localhost:8080/api/v1/clients/snapshot/02e4cb64-6379-4e3d-a96e-1331bd3e0760
 Accept: application/json

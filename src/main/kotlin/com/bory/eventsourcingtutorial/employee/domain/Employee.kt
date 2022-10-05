@@ -1,7 +1,7 @@
 package com.bory.eventsourcingtutorial.employee.domain
 
 import com.bory.eventsourcingtutorial.client.domain.exception.NoSuchProjectException
-import com.bory.eventsourcingtutorial.core.domain.AbstractPersistableAggregateRoot
+import com.bory.eventsourcingtutorial.core.domain.DomainAggregateRoot
 import com.bory.eventsourcingtutorial.employee.application.command.CreateEmployeeCommand
 import com.bory.eventsourcingtutorial.employee.application.command.UpdateEmployeeCommand
 import com.bory.eventsourcingtutorial.employee.application.dto.EmployeeDto
@@ -31,7 +31,7 @@ class Employee(
 
     @MappedCollection(idColumn = "uuid", keyColumn = "employee_uuid")
     var employeeProjects: List<EmployeeProject> = mutableListOf()
-) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt) {
+) : DomainAggregateRoot(uuid, version, createdAt, updatedAt) {
     @PersistenceCreator
     constructor(
         uuid: String,

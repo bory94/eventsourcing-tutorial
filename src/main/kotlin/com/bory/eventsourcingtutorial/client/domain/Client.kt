@@ -5,7 +5,7 @@ import com.bory.eventsourcingtutorial.client.application.command.UpdateClientCom
 import com.bory.eventsourcingtutorial.client.application.dto.ClientDto
 import com.bory.eventsourcingtutorial.client.application.event.*
 import com.bory.eventsourcingtutorial.client.domain.exception.NoSuchProjectException
-import com.bory.eventsourcingtutorial.core.domain.AbstractPersistableAggregateRoot
+import com.bory.eventsourcingtutorial.core.domain.DomainAggregateRoot
 import org.springframework.data.annotation.PersistenceCreator
 import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
@@ -25,7 +25,7 @@ class Client(
 
     @MappedCollection(idColumn = "client_uuid", keyColumn = "uuid")
     var projects: List<Project> = mutableListOf(),
-) : AbstractPersistableAggregateRoot(uuid, version, createdAt, updatedAt) {
+) : DomainAggregateRoot(uuid, version, createdAt, updatedAt) {
 
     @PersistenceCreator
     constructor(

@@ -22,7 +22,7 @@ class EmployeeEventListener(
     }
 
     @Async
-    @EventListener(classes = [])
+    @EventListener
     fun on(event: EmployeeMoveFailedEvent) {
         val employee = employeeRepository.findByUuidAndDeletedIsFalse(event.employeeUuid)
             ?: throw NoSuchEmployeeException("Employee uuid[${event.employeeUuid} not found.")
@@ -40,7 +40,7 @@ class EmployeeEventListener(
     }
 
     @Async
-    @EventListener(classes = [])
+    @EventListener
     fun on(event: EmployeeMoveAcceptedEvent) {
         val employee = employeeRepository.findByUuidAndDeletedIsFalse(event.employeeUuid)
             ?: throw NoSuchEmployeeException("Employee uuid[${event.employeeUuid} not found.")
@@ -51,7 +51,7 @@ class EmployeeEventListener(
     }
 
     @Async
-    @EventListener(classes = [])
+    @EventListener
     fun on(event: EmployeeReleasedEvent) {
         LOGGER.debug("Employee[${event.employeeUuid}] RELEASED FROM Department[${event.releasedDepartmentUuid}] FINISHED.")
     }
