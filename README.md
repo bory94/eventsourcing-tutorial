@@ -144,7 +144,7 @@ fun projectClient(@PathVariable("aggregateId") aggregateId: String): ClientDto {
 
 ## CQRS
 
-In fact, there is no heavy CQRS features in this project. There are just an event_source table and
+In fact, there is no heavy CQRS feature in this project. There are just an event_source table and
 tables for domain entity classes.
 
 You can check [mysql-init.sq](docker/initdb.d/mysql-init.sql) file for entity relationship.
